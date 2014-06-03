@@ -1,0 +1,21 @@
+Listview Adapter
+    http://elbauldelprogramador.com/adapter-personalizado-en-android/
+    http://developer.android.com/reference/android/os/Parcelable.html
+    http://lucasr.org/2012/04/05/performance-tips-for-androids-listview/
+    http://www.vogella.com/tutorials/AndroidListView/article.html
+
+
+Intent open file
+    http://www.androidsnippets.com/open-any-type-of-file-with-default-intent
+    http://stackoverflow.com/questions/21304489/how-to-open-private-files-saved-to-the-internal-storage-using-intent-action-view
+    http://stackoverflow.com/questions/13856757/android-alternative-to-the-deprecated-context-mode-world-readable
+    http://stackoverflow.com/questions/12585747/how-to-open-a-file-in-android-via-an-intent
+    http://stackoverflow.com/questions/6265298/action-view-intent-for-a-file-with-unknown-mimetype
+
+Storing files
+    http://developer.android.com/guide/topics/data/data-storage.html#filesExternal
+    http://developer.android.com/guide/topics/data/data-storage.html#filesInternal
+
+
+File picker
+    http://www.scorchworks.com/Blog/simple-file-dialog-for-android-applications/
