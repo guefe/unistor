@@ -200,6 +200,8 @@ public class MainActivity extends ActionBarActivity {
             if(position==0){
                 Log.i("Info method", "getItem "+position);
                 return new DropboxFragment();
+            }else if(position == 1){
+                return new GDriveFragment();
             }
             return PlaceholderFragment.newInstance(position + 1);
         }
