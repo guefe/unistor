@@ -73,8 +73,6 @@ public class DropboxFragment extends UnistorFragment implements UploadFileAsyncT
 
     private ListView listView;
 
-    private Integer prueba;
-
     private void init(){
         // Start application in the root path
         this.currentPath = "/";
@@ -105,35 +103,38 @@ public class DropboxFragment extends UnistorFragment implements UploadFileAsyncT
         }else{
             this.init();
         }
-        //Load root content
-        if(currentContent == null || currentContent.size() == 0){
-            currentContent = this.loadContent(this.currentPath);
-        }
-        populateContentListView(currentContent);
 
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                ViewHolder holder = (ViewHolder) view.getTag();
-                if(holder.getEntry().getName().contains(".apk")){
-                    Toast.makeText(mContext, R.string.open_apk_error, Toast.LENGTH_LONG).show();
-                } else if (!holder.getEntry().isFolder()) {
-                    DownloadFileAsyncTask downloadTask = new DownloadFileAsyncTask(mContext, mDBApi, holder.getEntry().getPath());
-                    downloadTask.execute();
-                }else {
-                    //TODO backButton historial o parentPath?? --> parentPath implica consumoDAtos
-                    ContentStatus currentStatus = new ContentStatus(
-                            new ArrayList<UnistorEntry>(currentContent),
-                            new String(currentHash),
-                            new String(currentPath));
-                    statusHistory.push(currentStatus);
-                    currentContent = loadContent(holder.getEntry().getPath());
-                    populateContentListView(currentContent);
-                }
-
+        // Only load content if session has been correctly established
+        if(mDBApi.getSession().isLinked()) {
+            //Load root content
+            if (currentContent == null || currentContent.size() == 0) {
+                currentContent = loadContent(this.currentPath);
             }
-        });
+            populateContentListView(currentContent);
 
+            listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                    ViewHolder holder = (ViewHolder) view.getTag();
+                    if (holder.getEntry().getName().contains(".apk")) {
+                        Toast.makeText(mContext, R.string.open_apk_error, Toast.LENGTH_LONG).show();
+                    } else if (!holder.getEntry().isFolder()) {
+                        DownloadFileAsyncTask downloadTask = new DownloadFileAsyncTask(mContext, mDBApi, holder.getEntry().getPath());
+                        downloadTask.execute();
+                    } else {
+                        //TODO backButton historial o parentPath?? --> parentPath implica consumoDAtos
+                        ContentStatus currentStatus = new ContentStatus(
+                                new ArrayList<UnistorEntry>(currentContent),
+                                new String(currentHash),
+                                new String(currentPath));
+                        statusHistory.push(currentStatus);
+                        currentContent = loadContent(holder.getEntry().getPath());
+                        populateContentListView(currentContent);
+                    }
+
+                }
+            });
+        }
         return rootView;
     }
 
@@ -393,7 +394,8 @@ public class DropboxFragment extends UnistorFragment implements UploadFileAsyncT
                 getActivity().invalidateOptionsMenu();
                 break;
             case 1:// Move
-                ((MainActivity)getActivity()).setPathToCopy(itemViewHolder.getEntry().getPath());
+                ((MainActivity)getActivity()).setPathToMove(itemViewHolder.getEntry().getPath());
+                getActivity().invalidateOptionsMenu();
                 break;
             case 2:// Delete
                 this.deleteElement(itemViewHolder.getEntry().getPath());
@@ -417,9 +419,10 @@ public class DropboxFragment extends UnistorFragment implements UploadFileAsyncT
     public void onPrepareOptionsMenu(Menu menu) {
         super.onPrepareOptionsMenu(menu);
         MainActivity activity = (MainActivity)getActivity();
-        if(activity.getPathToCopyMove() != null){
-            //menu.findItem(R.id.action_upload).setVisible(false);
+        if(activity.getCopyMoveAction() != Constants.ACTION_PASTE_DONE){
             menu.findItem(R.id.action_paste).setVisible(true);
+        }else{
+            menu.findItem(R.id.action_paste).setVisible(false);
         }
 
     }
@@ -509,16 +512,21 @@ public class DropboxFragment extends UnistorFragment implements UploadFileAsyncT
     public boolean pasteFile(String source, int mode) {
         boolean result = false;
         try {
-            switch (mode) {
+            String namefile = source.substring(source.lastIndexOf('/'));
+            String dest = this.currentPath.concat(namefile);
 
+            switch (mode) {
                 case Constants.ACTION_COPY:
-                    String dest = this.currentPath.concat("/");
                     mDBApi.copy(source, dest);
                     break;
                 case Constants.ACTION_MOVE:
-                    mDBApi.move(source, this.currentPath);
+                    mDBApi.move(source, dest);
                     break;
             }
+
+            // Refresh the current view to reflect the changes
+            this.currentContent = loadContent(this.currentPath);
+            populateContentListView(this.currentContent);
             result = true;
         }catch (DropboxServerException e) {
             switch (e.error){
@@ -554,14 +562,16 @@ public class DropboxFragment extends UnistorFragment implements UploadFileAsyncT
 
             }
         }catch (DropboxUnlinkedException e){
-
+            //TODO
         } catch (DropboxIOException e) {
             // Happens all the time, probably want to retry automatically.
             mErrorMsg = mContext.getString(R.string.dropbox_IO_excp_msg);
         }catch (DropboxException e) {
             // Unknown error
             mErrorMsg = mContext.getString(R.string.dropbox_excp_msg);
-        }finally {
+        }
+
+        if(mErrorMsg != null){
             Toast.makeText(mContext,mErrorMsg, Toast.LENGTH_LONG).show();
         }
 

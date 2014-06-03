@@ -41,7 +41,8 @@ public class MainActivity extends ActionBarActivity {
     ViewPager mViewPager;
 
     private String pathToCopyMove;
-    private int copyMoveAction;
+    // Initialize action to the default value, used when there is no action to do.
+    private int copyMoveAction = Constants.ACTION_PASTE_DONE;
 
     private Menu mainMenu;
 
@@ -101,7 +102,6 @@ public class MainActivity extends ActionBarActivity {
 
             case R.id.action_paste:
                 this.pasteFile();
-                this.mainMenu.findItem(R.id.action_paste).setVisible(false);
                 invalidateOptionsMenu();
                 break;
             default:
@@ -144,6 +144,9 @@ public class MainActivity extends ActionBarActivity {
 
         fragment.pasteFile(this.getPathToCopyMove(), this.copyMoveAction);
 
+        this.copyMoveAction = Constants.ACTION_PASTE_DONE;
+
+
 
     }
 
@@ -164,6 +167,10 @@ public class MainActivity extends ActionBarActivity {
 
     public String getPathToCopyMove() {
         return pathToCopyMove;
+    }
+
+    public int getCopyMoveAction(){
+        return this.copyMoveAction;
     }
 
     public void setPathToCopy(String path) {

@@ -13,6 +13,7 @@ public final class Constants {
 
     public static final int ACTION_COPY = 0;
     public static final int ACTION_MOVE = 1;
+    public static final int ACTION_PASTE_DONE = -1;
 
 
 

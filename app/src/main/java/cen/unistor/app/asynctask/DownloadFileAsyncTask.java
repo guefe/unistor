@@ -124,7 +124,6 @@ public class DownloadFileAsyncTask extends AsyncTask<Void, Long, Boolean> {
                 return false;
             }
             mContext.startActivity(intent);
-
         } catch (DropboxUnlinkedException e) {
             // The AuthSession wasn't properly authenticated or user unlinked.
         } catch (DropboxPartialFileException e) {
