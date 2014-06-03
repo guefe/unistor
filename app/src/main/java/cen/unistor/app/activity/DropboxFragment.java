@@ -73,6 +73,7 @@ public class DropboxFragment extends UnistorFragment implements UploadFileAsyncT
 
     private ListView listView;
 
+    private Integer prueba;
 
     private void init(){
         // Start application in the root path
