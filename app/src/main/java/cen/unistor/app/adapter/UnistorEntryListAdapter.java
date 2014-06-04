@@ -70,10 +70,6 @@ public class UnistorEntryListAdapter extends ArrayAdapter<UnistorEntry>{
     }
 
 
-//    @Override
-//    public int getCount() {
-//        return this.mItemList.length;
-//    }
 
 
 

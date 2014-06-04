@@ -22,5 +22,6 @@ dependencies {
     compile 'com.android.support:appcompat-v7:+'
     compile 'com.googlecode.json-simple:json-simple:1.1'
     compile 'com.google.android.gms:play-services:4.4.52'
+    compile 'com.google.apis:google-api-services-drive:v2-rev127-1.18.0-rc'
     compile fileTree(dir: 'libs', include: ['*.jar'])
 }

@@ -198,11 +198,10 @@ public class MainActivity extends ActionBarActivity {
             // getItem is called to instantiate the fragment for the given page.
             // Return a PlaceholderFragment (defined as a static inner class below).
             if(position==0){
-                Log.i("Info method", "getItem "+position);
-                //return new DropboxFragment();
-                return new GDriveFragment();
-            //}else if(position == 1){
+                return new DropboxFragment();
                 //return new GDriveFragment();
+            }else if(position == 1){
+                return new GDriveFragment();
             }
             return PlaceholderFragment.newInstance(position + 1);
         }
