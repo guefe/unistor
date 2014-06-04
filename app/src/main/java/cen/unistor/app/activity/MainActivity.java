@@ -199,9 +199,10 @@ public class MainActivity extends ActionBarActivity {
             // Return a PlaceholderFragment (defined as a static inner class below).
             if(position==0){
                 Log.i("Info method", "getItem "+position);
-                return new DropboxFragment();
-            }else if(position == 1){
+                //return new DropboxFragment();
                 return new GDriveFragment();
+            //}else if(position == 1){
+                //return new GDriveFragment();
             }
             return PlaceholderFragment.newInstance(position + 1);
         }
@@ -216,9 +217,9 @@ public class MainActivity extends ActionBarActivity {
         public CharSequence getPageTitle(int position) {
             Locale l = Locale.getDefault();
             switch (position) {
-                case 0:
-                    return getString(R.string.title_section1).toUpperCase(l);
                 case 1:
+                    return getString(R.string.title_section1).toUpperCase(l);
+                case 0:
                     return getString(R.string.title_section2).toUpperCase(l);
                 case 2:
                     return getString(R.string.title_section3).toUpperCase(l);

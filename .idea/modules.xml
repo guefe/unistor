@@ -2,8 +2,8 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/Unistor.iml" filepath="$PROJECT_DIR$/Unistor.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/unistor.iml" filepath="$PROJECT_DIR$/unistor.iml" />
       <module fileurl="file://$PROJECT_DIR$/unistor.iml" filepath="$PROJECT_DIR$/unistor.iml" />
     </modules>
   </component>
