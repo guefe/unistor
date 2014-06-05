@@ -32,6 +32,7 @@ public class BoxFragment extends UnistorFragment implements OnUploadFinishedList
 
     private final String CLIENT_ID = "trybv0asmi4v693ildrqpakn1642x5q5";
     private final String CLIENT_SECRET = "jBhlEPtO8Hat0WSczsDx9PVmetjJfMjd";
+    private final String REDIRECT_URI="http://localhost";
 
     private final String AUTH_KEY = "AUTH_KEY";
     private final static int AUTH_REQUEST = 1;
@@ -54,7 +55,7 @@ public class BoxFragment extends UnistorFragment implements OnUploadFinishedList
     }
 
     public void startAuthentication(){
-        Intent intent = OAuthActivity.createOAuthActivityIntent(mContext, CLIENT_ID, CLIENT_SECRET);
+        Intent intent = OAuthActivity.createOAuthActivityIntent(mContext, CLIENT_ID, CLIENT_SECRET, false , REDIRECT_URI);
         this.startActivityForResult(intent, AUTH_REQUEST);
     }
 

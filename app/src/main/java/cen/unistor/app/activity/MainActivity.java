@@ -22,6 +22,7 @@ import cen.unistor.app.util.SimpleFileDialog;
 
 public class MainActivity extends ActionBarActivity {
 
+    private static int ACCOUNT_NUMBER = 2;
     /**
      * The {@link android.support.v4.view.PagerAdapter} that will provide
      * fragments for each of the sections. We use a
@@ -41,7 +42,6 @@ public class MainActivity extends ActionBarActivity {
     // Initialize action to the default value, used when there is no action to do.
     private int copyMoveAction = Constants.ACTION_PASTE_DONE;
 
-    private Menu mainMenu;
 
 
 
@@ -77,7 +77,6 @@ public class MainActivity extends ActionBarActivity {
         
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main, menu);
-        this.mainMenu = menu;
         return true;
     }
 
@@ -193,28 +192,32 @@ public class MainActivity extends ActionBarActivity {
         public Fragment getItem(int position) {
             // getItem is called to instantiate the fragment for the given page.
             // Return a PlaceholderFragment (defined as a static inner class below).
-            if(position==0){
-                return new DropboxFragment();
-                //return new BoxFragment();
-            }else if(position == 1){
 
+            switch (position){
+                case 0:
+                    return new DropboxFragment();
+                case 1:
+                    return new BoxFragment();
+                default:
+                    return PlaceholderFragment.newInstance(position + 1);
             }
-            return PlaceholderFragment.newInstance(position + 1);
+
+
         }
 
         @Override
         public int getCount() {
             // Show 3 total pages.
-            return 3;
+            return ACCOUNT_NUMBER;
         }
 
         @Override
         public CharSequence getPageTitle(int position) {
             Locale l = Locale.getDefault();
             switch (position) {
-                case 1:
-                    return getString(R.string.title_section1).toUpperCase(l);
                 case 0:
+                    return getString(R.string.title_section1).toUpperCase(l);
+                case 1:
                     return getString(R.string.title_section2).toUpperCase(l);
                 case 2:
                     return getString(R.string.title_section3).toUpperCase(l);
