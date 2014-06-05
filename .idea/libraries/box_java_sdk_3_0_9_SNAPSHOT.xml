@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="box-java-sdk-3.0.9-SNAPSHOT">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/com/box/box-java-sdk/3.0.9-SNAPSHOT/box-java-sdk-3.0.9-SNAPSHOT.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

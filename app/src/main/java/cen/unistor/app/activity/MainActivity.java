@@ -15,6 +15,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import com.box.boxandroidlibv2.BoxAndroidClient;
+
 import java.util.Locale;
 
 import cen.unistor.app.R;
@@ -145,7 +147,6 @@ public class MainActivity extends ActionBarActivity {
         fragment.pasteFile(this.getPathToCopyMove(), this.copyMoveAction);
 
         this.copyMoveAction = Constants.ACTION_PASTE_DONE;
-
 
 
     }

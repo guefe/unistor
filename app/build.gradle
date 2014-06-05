@@ -2,13 +2,12 @@ apply plugin: 'android'
 
 android {
     compileSdkVersion 19
-    buildToolsVersion "19.0.3"
-
+    buildToolsVersion '19.0.3'
     defaultConfig {
         minSdkVersion 11
         targetSdkVersion 19
         versionCode 1
-        versionName "1.0"
+        versionName '1.0'
     }
     buildTypes {
         release {
@@ -16,12 +15,17 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
         }
     }
+    productFlavors {
+    }
 }
+
 
 dependencies {
     compile 'com.android.support:appcompat-v7:+'
     compile 'com.googlecode.json-simple:json-simple:1.1'
     compile 'com.google.android.gms:play-services:4.4.52'
     compile 'com.google.apis:google-api-services-drive:v2-rev127-1.18.0-rc'
-    compile fileTree(dir: 'libs', include: ['*.jar'])
+    compile project(":BoxAndroidLibraryV2")
+    compile fileTree(include: ['*.jar'], dir: 'libs')
+
 }
