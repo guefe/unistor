@@ -7,20 +7,15 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBarActivity;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
-
-import com.box.boxandroidlibv2.BoxAndroidClient;
 
 import java.util.Locale;
 
 import cen.unistor.app.R;
-import cen.unistor.app.asynctask.UploadFileAsyncTask;
 import cen.unistor.app.util.Constants;
 import cen.unistor.app.util.SimpleFileDialog;
 
@@ -200,9 +195,9 @@ public class MainActivity extends ActionBarActivity {
             // Return a PlaceholderFragment (defined as a static inner class below).
             if(position==0){
                 return new DropboxFragment();
-                //return new GDriveFragment();
+                //return new BoxFragment();
             }else if(position == 1){
-                return new GDriveFragment();
+
             }
             return PlaceholderFragment.newInstance(position + 1);
         }

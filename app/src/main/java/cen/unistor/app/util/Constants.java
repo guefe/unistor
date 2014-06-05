@@ -5,6 +5,8 @@ package cen.unistor.app.util;
  */
 public final class Constants {
 
+    public static final String PREFS_NAME = "UnistorPreferences";
+
     public static final int ENTRY_TYPE_BACK = 0;
     public static final int ENTRY_TYPE_FOLDER = 1;
     public static final int ENTRY_TYPE_TEXT_FILE = 2;

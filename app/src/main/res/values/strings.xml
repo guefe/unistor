@@ -8,7 +8,7 @@
     <string name="action_settings">Configuración</string>
     <string name="desc_icon">icon</string>
 
-    <!-- Dropbox error messages-->
+    <!-- Dropbox error messages -->
     <string name="dropbox_IO_excp_msg">Error en la red, inténtelo de nuevo.</string>
     <string name="dropbox_parse_excp_msg">Error de Dropbox.  Pruebe de nuevo.</string>
     <string name="dropbox_excp_msg">Error desconocido. Pruebe de nuevo.</string>
@@ -17,7 +17,6 @@
     <string name="dropbox_503_service_unavailable">Dropbox parece estar caído...</string>
     <string name="dropbox_507_insufficient_storage_msg">Espacio en cuenta insuficiente.</string>
     <string name="dropbox_404_not_found">No se encuentra el recurso.</string>
-
     <string name="upload_dialog_msg">Subiendo: </string>
     <string name="download_dialog_msg">Descargando: </string>
     <string name="canceled_msg">Cancelado</string>
@@ -31,12 +30,12 @@
     <string name="action_paste">Pegar</string>
     <string name="dropbox_filesize_exp_msg">El tamaño del archivo excede el máximo permitido por Dropbox</string>
 
-
     <string-array name="context_menu_array">
         <item>Copiar</item>
         <item>Mover</item>
         <item>Eliminar</item>
     </string-array>
 
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 
 </resources>

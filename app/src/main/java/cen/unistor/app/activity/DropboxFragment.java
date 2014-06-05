@@ -25,7 +25,6 @@ import com.dropbox.client2.exception.DropboxServerException;
 import com.dropbox.client2.exception.DropboxUnlinkedException;
 import com.dropbox.client2.session.AccessTokenPair;
 import com.dropbox.client2.session.AppKeyPair;
-import com.google.api.services.drive.Drive;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -53,7 +52,7 @@ public class DropboxFragment extends UnistorFragment implements UploadFileAsyncT
     private static final String APP_KEY = "t820v1xgtrvep1l";
     private static final String APP_SECRET = "m1aki6lwux6phy5";
 
-    private static final String ACCOUNT_PREFS_NAME = "prefs";
+
     private static final String ACCESS_KEY_NAME = "ACCESS_KEY";
     private static final String ACCESS_SECRET_NAME = "ACCESS_SECRET";
 
@@ -92,7 +91,7 @@ public class DropboxFragment extends UnistorFragment implements UploadFileAsyncT
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
-        final View rootView = inflater.inflate(R.layout.fragment_main, container, false);
+        View rootView = inflater.inflate(R.layout.fragment_main, container, false);
 
         this.mContext = rootView.getContext();
 
@@ -180,7 +179,7 @@ public class DropboxFragment extends UnistorFragment implements UploadFileAsyncT
      * time (which is not to be done, ever).
      */
     private void loadAuth(AndroidAuthSession session) {
-        SharedPreferences prefs = getActivity().getSharedPreferences(ACCOUNT_PREFS_NAME, 0);
+        SharedPreferences prefs = getActivity().getSharedPreferences(Constants.PREFS_NAME, 0);
         String key = prefs.getString(ACCESS_KEY_NAME, null);
         String secret = prefs.getString(ACCESS_SECRET_NAME, null);
         if (key == null || secret == null || key.length() == 0 || secret.length() == 0) return;
@@ -203,7 +202,7 @@ public class DropboxFragment extends UnistorFragment implements UploadFileAsyncT
         // Store the OAuth 2 access token, if there is one.
         String oauth2AccessToken = session.getOAuth2AccessToken();
         if (oauth2AccessToken != null) {
-            SharedPreferences prefs = getActivity().getSharedPreferences(ACCOUNT_PREFS_NAME, 0);
+            SharedPreferences prefs = getActivity().getSharedPreferences(Constants.PREFS_NAME, 0);
             SharedPreferences.Editor edit = prefs.edit();
             edit.putString(ACCESS_KEY_NAME, "oauth2:");
             edit.putString(ACCESS_SECRET_NAME, oauth2AccessToken);
@@ -214,7 +213,7 @@ public class DropboxFragment extends UnistorFragment implements UploadFileAsyncT
         // you're still using OAuth 1.
         AccessTokenPair oauth1AccessToken = session.getAccessTokenPair();
         if (oauth1AccessToken != null) {
-            SharedPreferences prefs = getActivity().getSharedPreferences(ACCOUNT_PREFS_NAME, 0);
+            SharedPreferences prefs = getActivity().getSharedPreferences(Constants.PREFS_NAME, 0);
             SharedPreferences.Editor edit = prefs.edit();
             edit.putString(ACCESS_KEY_NAME, oauth1AccessToken.key);
             edit.putString(ACCESS_SECRET_NAME, oauth1AccessToken.secret);
@@ -235,7 +234,7 @@ public class DropboxFragment extends UnistorFragment implements UploadFileAsyncT
     }
 
     private void clearKeys() {
-        SharedPreferences prefs = getActivity().getSharedPreferences(ACCOUNT_PREFS_NAME, 0);
+        SharedPreferences prefs = getActivity().getSharedPreferences(Constants.PREFS_NAME, 0);
         SharedPreferences.Editor edit = prefs.edit();
         edit.clear();
         edit.commit();
