@@ -9,7 +9,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
-import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -77,29 +76,38 @@ public abstract class UnistorFragment extends Fragment{
 
     @Override
     public boolean onContextItemSelected(MenuItem item) {
-        // Gets the itemView in the adapter
-        AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
-        View view = info.targetView;
-        ViewHolder itemViewHolder = (ViewHolder)view.getTag();
+        // getUserVisibleHint is needed in a multi-fragment environment.
+        // returns true if the fragment is the visible one.
+        if (getUserVisibleHint()) {
+            // Handle menu events and return true
 
-        switch (item.getItemId()){
-            case 0:// Copy
-                ((MainActivity)getActivity()).setPathToCopy(itemViewHolder.getEntry().getPath());
-                getActivity().invalidateOptionsMenu();
-                break;
-            case 1:// Move
-                ((MainActivity)getActivity()).setPathToMove(itemViewHolder.getEntry().getPath());
-                getActivity().invalidateOptionsMenu();
-                break;
-            case 2:// Delete
-                this.deleteElement(itemViewHolder.getEntry().getPath());
-                currentContent = loadContent(currentPath);
-                populateContentListView(currentContent);
-                break;
-        }
+            // Gets the itemView in the adapter
+            AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
+            View view = info.targetView;
+            ViewHolder itemViewHolder = (ViewHolder)view.getTag();
 
-        return true;
+            switch (item.getItemId()){
+                case 0:// Copy
+                    ((MainActivity)getActivity()).setPathToCopy(itemViewHolder.getEntry().getPath());
+                    getActivity().invalidateOptionsMenu();
+                    break;
+                case 1:// Move
+                    ((MainActivity)getActivity()).setPathToMove(itemViewHolder.getEntry().getPath());
+                    getActivity().invalidateOptionsMenu();
+                    break;
+                case 2:// Delete
+                    deleteElement(itemViewHolder.getEntry().getPath());
+                    currentContent = loadContent(currentPath);
+                    populateContentListView(currentContent);
+                    break;
+            }
+
+            return true;
+        } else
+            return false;
     }
+
+
 
     protected abstract ArrayList<UnistorEntry> loadContent(String path);
 

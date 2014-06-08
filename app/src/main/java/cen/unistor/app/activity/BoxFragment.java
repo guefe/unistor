@@ -1,6 +1,5 @@
 package cen.unistor.app.activity;
 
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -14,7 +13,6 @@ import android.widget.Toast;
 
 import com.box.boxandroidlibv2.BoxAndroidClient;
 import com.box.boxandroidlibv2.activities.OAuthActivity;
-import com.box.boxandroidlibv2.dao.BoxAndroidFile;
 import com.box.boxandroidlibv2.dao.BoxAndroidOAuthData;
 import com.box.boxandroidlibv2.jsonparsing.AndroidBoxResourceHub;
 import com.box.boxjavalibv2.authorization.OAuthRefreshListener;
@@ -33,18 +31,15 @@ import com.box.restclientv2.exceptions.BoxRestException;
 import org.apache.commons.lang.StringUtils;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Stack;
 
 import cen.unistor.app.R;
 import cen.unistor.app.adapter.UnistorEntry;
-import cen.unistor.app.adapter.UnistorEntryListAdapter;
 import cen.unistor.app.adapter.ViewHolder;
 import cen.unistor.app.asynctask.DownloadFileAsyncTask;
-import cen.unistor.app.asynctask.UploadFileAsyncTask.*;
+import cen.unistor.app.asynctask.UploadFileAsyncTask.OnUploadFinishedListener;
 import cen.unistor.app.util.Constants;
 import cen.unistor.app.util.ContentStatus;
-import cen.unistor.app.util.UnistorEntryComparator;
 
 /**
  * Created by carlos on 5/06/14.
@@ -68,7 +63,7 @@ public class BoxFragment extends UnistorFragment implements OnUploadFinishedList
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
-        startAuthentication();
+
 
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
         listView = (ListView)rootView.findViewById(R.id.listView);
@@ -77,7 +72,7 @@ public class BoxFragment extends UnistorFragment implements OnUploadFinishedList
         // Initilize with the ID of the root folder.
         currentPath = "0";
 
-
+        startAuthentication();
         return rootView;
     }
 
@@ -256,9 +251,21 @@ public class BoxFragment extends UnistorFragment implements OnUploadFinishedList
         return false;
     }
 
+
     @Override
     protected void deleteElement(String path) {
+        Log.i(TAG, "deleteElement "+path);
+        try {
+            mBoxClient.getFilesManager().deleteFile(path,null);
+        } catch (BoxRestException e) {
 
+            e.printStackTrace();
+        } catch (BoxServerException e) {
+            e.getStatusCode();
+            e.printStackTrace();
+        } catch (AuthFatalFailureException e) {
+            e.printStackTrace();
+        }
     }
 
 

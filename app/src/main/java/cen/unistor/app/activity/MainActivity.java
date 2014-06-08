@@ -13,9 +13,11 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
+import java.util.ArrayList;
 import java.util.Locale;
 
 import cen.unistor.app.R;
+import cen.unistor.app.adapter.UnistorEntry;
 import cen.unistor.app.util.Constants;
 import cen.unistor.app.util.SimpleFileDialog;
 
@@ -273,6 +275,16 @@ public class MainActivity extends ActionBarActivity {
         @Override
         public boolean pasteFile(String source, int mode) {
             return false;
+        }
+
+        @Override
+        protected void deleteElement(String path) {
+
+        }
+
+        @Override
+        protected ArrayList<UnistorEntry> loadContent(String path) {
+            return null;
         }
     }
 
