@@ -8,6 +8,12 @@ import android.os.AsyncTask;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.box.boxandroidlibv2.BoxAndroidClient;
+import com.box.boxjavalibv2.exceptions.AuthFatalFailureException;
+import com.box.boxjavalibv2.exceptions.BoxJSONException;
+import com.box.boxjavalibv2.exceptions.BoxServerException;
+import com.box.restclientv2.exceptions.BoxRestException;
+import com.box.restclientv2.requestsbase.BoxFileUploadRequestObject;
 import com.dropbox.client2.DropboxAPI;
 import com.dropbox.client2.ProgressListener;
 import com.dropbox.client2.exception.DropboxException;
@@ -32,6 +38,8 @@ import cen.unistor.app.R;
 
 public class UploadFileAsyncTask extends AsyncTask<Void, Long, Boolean> {
 
+    // Interface to be implemented by the fragment to have a notice
+    // when the upload has finished.
     public interface OnUploadFinishedListener{
         public void onUploadFinish();
     }
@@ -39,21 +47,41 @@ public class UploadFileAsyncTask extends AsyncTask<Void, Long, Boolean> {
     private ProgressDialog mProgressDialog;
     private OnUploadFinishedListener finishListener;
     private Context mContext;
-    private DropboxAPI<?> mDBApi;
+
+    /* Path in dropbox, id in Box */
     private String mSourcePath;
     private String mDestPath;
-    private String fileName;
 
-    private DropboxAPI.UploadRequest uploadRequest;
+    /* Dropbox parameters */
+    private DropboxAPI<?> mDBApi;
+    private String mFileName;
+    private DropboxAPI.UploadRequest mUploadRequest;
+
+
+    /* Box parameters */
+    private BoxAndroidClient mBoxClient;
+    private File mSourceFile;
+
+
 
     private String mErrorMsg;
+
 
     public UploadFileAsyncTask(Context context, DropboxAPI<?> dbapi, String sourcePath, String mDestPath, OnUploadFinishedListener listener){
         this.mContext = context;
         this.mDBApi = dbapi;
         this.mSourcePath = sourcePath;
         this.mDestPath = mDestPath;
-        this.fileName = sourcePath.substring(sourcePath.lastIndexOf('/')+1);
+        this.mFileName = sourcePath.substring(sourcePath.lastIndexOf('/')+1);
+        this.finishListener = listener;
+    }
+
+    public UploadFileAsyncTask(Context context, BoxAndroidClient client, File file, String parentID, OnUploadFinishedListener listener){
+        this.mContext = context;
+        this.mBoxClient = client;
+        this.mSourceFile = file;
+        this.mFileName = file.getName();
+        this.mDestPath = parentID;
         this.finishListener = listener;
     }
 
@@ -62,7 +90,7 @@ public class UploadFileAsyncTask extends AsyncTask<Void, Long, Boolean> {
         String btnLbl = mContext.getString(R.string.btn_cancel);
 
         this.mProgressDialog = new ProgressDialog(mContext);
-        mProgressDialog.setMessage(mContext.getString(R.string.upload_dialog_msg) + fileName);
+        mProgressDialog.setMessage(mContext.getString(R.string.upload_dialog_msg) + mFileName);
         mProgressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
         mProgressDialog.setCancelable(true);
         mProgressDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
@@ -70,7 +98,7 @@ public class UploadFileAsyncTask extends AsyncTask<Void, Long, Boolean> {
             public void onCancel(DialogInterface dialogInterface) {
                 Log.i("Info: ", "onCancel fired");
                 cancel(true);
-                uploadRequest.abort();
+                mUploadRequest.abort();
                 mErrorMsg = mContext.getString(R.string.canceled_msg);
             }
         });
@@ -79,7 +107,7 @@ public class UploadFileAsyncTask extends AsyncTask<Void, Long, Boolean> {
             public void onClick(DialogInterface dialog, int which) {
                 Log.i("Info: ", "Button fired");
                 cancel(true);
-                uploadRequest.abort();
+                mUploadRequest.abort();
                 mErrorMsg = mContext.getString(R.string.canceled_msg);
 
                 // This will cancel the getThumbnail operation by closing
@@ -109,10 +137,10 @@ public class UploadFileAsyncTask extends AsyncTask<Void, Long, Boolean> {
             File file = new File(mSourcePath);
             InputStream stream = new FileInputStream(file);
 
-            this.uploadRequest = this.mDBApi.putFileRequest(mDestPath+this.fileName, stream, file.length(), null, new MyProgressListener());
+            this.mUploadRequest = this.mDBApi.putFileRequest(mDestPath+this.mFileName, stream, file.length(), null, new MyProgressListener());
 
-            this.uploadRequest.upload();
-            //this.mDBApi.putFile(mDestPath+this.fileName, stream, DropboxAPI.MAX_UPLOAD_SIZE + 1024, null, new MyProgressListener());
+            this.mUploadRequest.upload();
+            //this.mDBApi.putFile(mDestPath+this.mFileName, stream, DropboxAPI.MAX_UPLOAD_SIZE + 1024, null, new MyProgressListener());
             result = true;
 
         } catch (FileNotFoundException e) {
@@ -190,6 +218,7 @@ public class UploadFileAsyncTask extends AsyncTask<Void, Long, Boolean> {
 
 
 
+
     @Override
     protected void onPostExecute(Boolean result) {
         mProgressDialog.dismiss();
@@ -200,6 +229,35 @@ public class UploadFileAsyncTask extends AsyncTask<Void, Long, Boolean> {
         }else{
             Toast.makeText(mContext, mErrorMsg, Toast.LENGTH_LONG).show();
         }
+    }
+
+    @Override
+    protected void onCancelled() {
+        mProgressDialog.dismiss();
+        Toast.makeText(mContext, mErrorMsg, Toast.LENGTH_LONG).show();
+
+    }
+
+
+    private void uploadBoxElement(){
+
+        try {
+            BoxFileUploadRequestObject uploadRequestObject = BoxFileUploadRequestObject.uploadFileRequestObject(mDestPath, mFileName, mSourceFile);
+            mBoxClient.getFilesManager().uploadFile(uploadRequestObject);
+
+            //TODO error handling
+        } catch (BoxRestException e) {
+            e.printStackTrace();
+        } catch (BoxJSONException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (BoxServerException e) {
+            e.printStackTrace();
+        } catch (AuthFatalFailureException e) {
+            e.printStackTrace();
+        }
+
     }
 
 

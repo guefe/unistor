@@ -30,6 +30,7 @@ import com.box.restclientv2.exceptions.BoxRestException;
 
 import org.apache.commons.lang.StringUtils;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Stack;
 
@@ -37,6 +38,7 @@ import cen.unistor.app.R;
 import cen.unistor.app.adapter.UnistorEntry;
 import cen.unistor.app.adapter.ViewHolder;
 import cen.unistor.app.asynctask.DownloadFileAsyncTask;
+import cen.unistor.app.asynctask.UploadFileAsyncTask;
 import cen.unistor.app.asynctask.UploadFileAsyncTask.OnUploadFinishedListener;
 import cen.unistor.app.util.Constants;
 import cen.unistor.app.util.ContentStatus;
@@ -210,6 +212,7 @@ public class BoxFragment extends UnistorFragment implements OnUploadFinishedList
                 Log.i(TAG, item.getName() + ": " + mimeType);
                 entryList.add(entry);
             }
+            //TODO error handling
         } catch (BoxRestException e) {
             e.printStackTrace();
         } catch (BoxServerException e) {
@@ -243,7 +246,11 @@ public class BoxFragment extends UnistorFragment implements OnUploadFinishedList
 
     @Override
     public boolean uploadFile(String path) {
-        return false;
+        File file = new File(path);
+        UploadFileAsyncTask task = new UploadFileAsyncTask(mContext, mBoxClient, file, currentPath, this);
+        task.execute();
+
+        return true;
     }
 
     @Override
@@ -257,6 +264,7 @@ public class BoxFragment extends UnistorFragment implements OnUploadFinishedList
         Log.i(TAG, "deleteElement "+path);
         try {
             mBoxClient.getFilesManager().deleteFile(path,null);
+            //TODO error handling
         } catch (BoxRestException e) {
 
             e.printStackTrace();

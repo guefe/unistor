@@ -111,10 +111,12 @@ public class DownloadFileAsyncTask extends AsyncTask<Void, Long, Boolean> {
         String mimeType;
 
         if(mBoxClient != null){
+            // Box download
             localFile = this.downloadBoxFile();
             String extension = mFileName.substring(mFileName.lastIndexOf('.') + 1).toLowerCase();
             mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
         }else {
+            // Dropbox download
             DropboxAPI.DropboxFileInfo dropBoxFile = this.downloadDropBoxFile();
             localFile = new File(mContext.getFilesDir(), this.mFileName);
             mimeType = dropBoxFile.getMimeType();
@@ -190,6 +192,7 @@ public class DownloadFileAsyncTask extends AsyncTask<Void, Long, Boolean> {
         this.mBoxProgressListener = new BoxProgressListener();
         try {
             mBoxClient.getFilesManager().downloadFile(this.mFileID, f, this.mBoxProgressListener, null);
+            //TODO error handling
         } catch (BoxRestException e) {
             e.printStackTrace();
         } catch (BoxServerException e) {
