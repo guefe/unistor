@@ -1,14 +1,9 @@
 package cen.unistor.app.activity;
 
-import android.app.Activity;
-import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.ContextMenu;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -27,24 +22,20 @@ import com.dropbox.client2.session.AccessTokenPair;
 import com.dropbox.client2.session.AppKeyPair;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Stack;
 
 import cen.unistor.app.R;
 import cen.unistor.app.adapter.UnistorEntry;
-import cen.unistor.app.adapter.UnistorEntryListAdapter;
 import cen.unistor.app.adapter.ViewHolder;
 import cen.unistor.app.asynctask.DownloadFileAsyncTask;
 import cen.unistor.app.asynctask.UploadFileAsyncTask;
 import cen.unistor.app.util.Constants;
 import cen.unistor.app.util.ContentStatus;
-import cen.unistor.app.util.UnistorEntryComparator;
 
 /**
  * Created by carlos on 10/05/14.
  */
 public class DropboxFragment extends UnistorFragment implements UploadFileAsyncTask.OnUploadFinishedListener{
-
 
 
     private final String TAG = "DropboxFragment";
@@ -60,18 +51,13 @@ public class DropboxFragment extends UnistorFragment implements UploadFileAsyncT
 
     private boolean loggedIn;
 
-    private Context mContext;
-
-    private Stack<ContentStatus> statusHistory;
-    // Used to minimize api calls
-    private ArrayList<UnistorEntry> currentContent;
     private String currentHash;
-    private String currentPath;
+
 
     //TODO mErrorMsg is useful?
     private String mErrorMsg;
 
-    private ListView listView;
+
 
     private void init(){
         // Start application in the root path
@@ -92,16 +78,14 @@ public class DropboxFragment extends UnistorFragment implements UploadFileAsyncT
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
-
-        this.mContext = rootView.getContext();
-
         listView = (ListView)rootView.findViewById(R.id.listView);
 
+        this.mContext = rootView.getContext();
+        this.init();
         if (savedInstanceState != null){
-            currentContent = savedInstanceState.getParcelableArrayList("content");
+            currentContent = savedInstanceState.getParcelableArrayList("currentContent");
+            currentPath = savedInstanceState.getString("currentPath");
             //statusHistory = savedInstanceState.put
-        }else{
-            this.init();
         }
 
         // Only load content if session has been correctly established
@@ -163,7 +147,8 @@ public class DropboxFragment extends UnistorFragment implements UploadFileAsyncT
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
-        outState.putParcelableArrayList("content", this.currentContent);
+        outState.putParcelableArrayList("currentContent", this.currentContent);
+        outState.putString("currentPath", currentPath);
     }
 
     private AndroidAuthSession buildSession() {
@@ -246,7 +231,8 @@ public class DropboxFragment extends UnistorFragment implements UploadFileAsyncT
      * @param path
      * @return
      */
-    private ArrayList<UnistorEntry> loadContent(String path){
+    @Override
+    protected ArrayList<UnistorEntry> loadContent(String path){
         DropboxAPI.Entry root = null;
         ArrayList<UnistorEntry> entryList = new ArrayList<UnistorEntry>();
         try {
@@ -337,70 +323,9 @@ public class DropboxFragment extends UnistorFragment implements UploadFileAsyncT
         return entryList;
     }
 
-    /**
-     *  Fills the listview with the content provided.
-     * @param content
-     */
-    private void populateContentListView(ArrayList<UnistorEntry> content){
-
-        // If first entry is back button, the content array
-        // is sorted without this item, which will be added in the first position
-        if(content.get(0).getEntryType() == Constants.ENTRY_TYPE_BACK){
-            UnistorEntry backEntry = content.remove(0);
-            Collections.sort(content, new UnistorEntryComparator());
-            content.add(0, backEntry);
-        }else{
-            Collections.sort(content, new UnistorEntryComparator());
-        }
-
-        // Setting the adapter with the new items.
-        // If the adapter have been previously created, we use notifyDataSetChanged,
-        // which uses pretty less resources than creating a new one.
-        if(this.listView.getAdapter() == null){
-            UnistorEntryListAdapter listViewAdapter = new UnistorEntryListAdapter(this.mContext, content);
-            this.listView.setAdapter(listViewAdapter);
-            // Set context menu for the listview
-            registerForContextMenu(listView);
-        }else{
-            UnistorEntryListAdapter listViewAdapter = (UnistorEntryListAdapter)this.listView.getAdapter();
-            listViewAdapter.clear();
-            listViewAdapter.addAll(content);
-            listViewAdapter.notifyDataSetChanged();
-        }
-
-    }
 
     @Override
-    public boolean onContextItemSelected(MenuItem item) {
-        // Gets the itemView in the adapter
-        AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
-        View view = info.targetView;
-        ViewHolder itemViewHolder = (ViewHolder)view.getTag();
-
-        switch (item.getItemId()){
-            case 0:// Copy
-                ((MainActivity)getActivity()).setPathToCopy(itemViewHolder.getEntry().getPath());
-                getActivity().invalidateOptionsMenu();
-                break;
-            case 1:// Move
-                ((MainActivity)getActivity()).setPathToMove(itemViewHolder.getEntry().getPath());
-                getActivity().invalidateOptionsMenu();
-                break;
-            case 2:// Delete
-                this.deleteElement(itemViewHolder.getEntry().getPath());
-                currentContent = loadContent(currentPath);
-                populateContentListView(currentContent);
-                break;
-        }
-
-        Toast.makeText(mContext,((MainActivity)getActivity()).getPathToCopyMove(),Toast.LENGTH_LONG).show();
-        return true;
-    }
-
-
-
-
-    private void deleteElement(String path){
+    protected void deleteElement(String path){
 
         try {
             mDBApi.delete(path);

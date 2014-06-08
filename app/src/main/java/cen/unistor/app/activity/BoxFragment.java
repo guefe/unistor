@@ -62,26 +62,21 @@ public class BoxFragment extends UnistorFragment implements OnUploadFinishedList
     private final static int UPLOAD_REQUEST = 2;
     private final static int DOWNLOAD_REQUEST = 3;
 
-    private Context mContext;
     private BoxAndroidClient mBoxClient;
 
-    private ListView listView;
-    private ArrayList<UnistorEntry> currentContent;
-    private String currentPath;
-    private Stack<ContentStatus> statusHistory;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
-        View rootView = inflater.inflate(R.layout.fragment_main, container, false);
-        mContext = rootView.getContext();
-
         startAuthentication();
 
-        this.listView = (ListView)rootView.findViewById(R.id.listView);
-        this.statusHistory = new Stack<ContentStatus>();
+        View rootView = inflater.inflate(R.layout.fragment_main, container, false);
+        listView = (ListView)rootView.findViewById(R.id.listView);
+        mContext = rootView.getContext();
+        statusHistory = new Stack<ContentStatus>();
         // Initilize with the ID of the root folder.
-        this.currentPath = "0";
+        currentPath = "0";
+
 
         return rootView;
     }
@@ -127,11 +122,6 @@ public class BoxFragment extends UnistorFragment implements OnUploadFinishedList
 
     }
 
-    @Override
-    public void onPause() {
-        super.onPause();
-    }
-
     public void startAuthentication(){
         BoxAndroidOAuthData oauth = loadSavedAuth();
         if (oauth != null){
@@ -172,8 +162,8 @@ public class BoxFragment extends UnistorFragment implements OnUploadFinishedList
         return client;
     }
 
-
-    private ArrayList<UnistorEntry> loadContent(String folderID){
+    @Override
+    protected ArrayList<UnistorEntry> loadContent(String folderID){
         ArrayList<UnistorEntry> entryList = new ArrayList<UnistorEntry>();
 
         try {
@@ -236,38 +226,6 @@ public class BoxFragment extends UnistorFragment implements OnUploadFinishedList
         return entryList;
     }
 
-    /**
-     *  Fills the listview with the content provided.
-     * @param content
-     */
-    private void populateContentListView(ArrayList<UnistorEntry> content){
-
-        // If first entry is back button, the content array
-        // is sorted without this item, which will be added in the first position
-        if(content.get(0).getEntryType() == Constants.ENTRY_TYPE_BACK){
-            UnistorEntry backEntry = content.remove(0);
-            Collections.sort(content, new UnistorEntryComparator());
-            content.add(0, backEntry);
-        }else{
-            Collections.sort(content, new UnistorEntryComparator());
-        }
-
-        // Setting the adapter with the new items.
-        // If the adapter have been previously created, we use notifyDataSetChanged,
-        // which uses pretty less resources than creating a new one.
-        if(this.listView.getAdapter() == null){
-            UnistorEntryListAdapter listViewAdapter = new UnistorEntryListAdapter(this.mContext, content);
-            this.listView.setAdapter(listViewAdapter);
-            // Set context menu for the listview
-            registerForContextMenu(listView);
-        }else{
-            UnistorEntryListAdapter listViewAdapter = (UnistorEntryListAdapter)this.listView.getAdapter();
-            listViewAdapter.clear();
-            listViewAdapter.addAll(content);
-            listViewAdapter.notifyDataSetChanged();
-        }
-
-    }
 
     @Override
     public void onUploadFinish() {
@@ -298,6 +256,10 @@ public class BoxFragment extends UnistorFragment implements OnUploadFinishedList
         return false;
     }
 
+    @Override
+    protected void deleteElement(String path) {
+
+    }
 
 
     private void saveAuth(BoxAndroidOAuthData auth) {

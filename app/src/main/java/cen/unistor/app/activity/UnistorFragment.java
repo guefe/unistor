@@ -1,19 +1,41 @@
 package cen.unistor.app.activity;
 
 import android.app.Activity;
+import android.content.Context;
 import android.support.v4.app.Fragment;
 import android.view.ContextMenu;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.ListView;
+import android.widget.Toast;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Stack;
 
 import cen.unistor.app.R;
+import cen.unistor.app.adapter.UnistorEntry;
+import cen.unistor.app.adapter.UnistorEntryListAdapter;
+import cen.unistor.app.adapter.ViewHolder;
 import cen.unistor.app.util.Constants;
+import cen.unistor.app.util.ContentStatus;
+import cen.unistor.app.util.UnistorEntryComparator;
 
 /**
  * Created by carlos on 26/05/14.
  */
 public abstract class UnistorFragment extends Fragment{
+
+    protected Context mContext;
+    protected ListView listView;
+
+    // Used to minimize api calls
+    protected ArrayList<UnistorEntry> currentContent;
+    protected String currentPath;
+    protected Stack<ContentStatus> statusHistory;
+
 
 
     public abstract boolean keyBackPressed();
@@ -21,6 +43,8 @@ public abstract class UnistorFragment extends Fragment{
     public abstract boolean uploadFile(String path);
 
     public abstract boolean pasteFile(String source, int mode);
+
+    protected abstract void deleteElement(String path);
 
     @Override
     public void onAttach(Activity activity) {
@@ -49,6 +73,68 @@ public abstract class UnistorFragment extends Fragment{
                 menu.add(Menu.NONE,i,Menu.NONE,menuEntries[i]);
             }
         }
+    }
+
+    @Override
+    public boolean onContextItemSelected(MenuItem item) {
+        // Gets the itemView in the adapter
+        AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
+        View view = info.targetView;
+        ViewHolder itemViewHolder = (ViewHolder)view.getTag();
+
+        switch (item.getItemId()){
+            case 0:// Copy
+                ((MainActivity)getActivity()).setPathToCopy(itemViewHolder.getEntry().getPath());
+                getActivity().invalidateOptionsMenu();
+                break;
+            case 1:// Move
+                ((MainActivity)getActivity()).setPathToMove(itemViewHolder.getEntry().getPath());
+                getActivity().invalidateOptionsMenu();
+                break;
+            case 2:// Delete
+                this.deleteElement(itemViewHolder.getEntry().getPath());
+                currentContent = loadContent(currentPath);
+                populateContentListView(currentContent);
+                break;
+        }
+
+        return true;
+    }
+
+    protected abstract ArrayList<UnistorEntry> loadContent(String path);
+
+
+    /**
+     *  Fills the listview with the content provided.
+     * @param content
+     */
+    protected void populateContentListView(ArrayList<UnistorEntry> content){
+
+        // If first entry is back button, the content array
+        // is sorted without this item, which will be added in the first position
+        if(content.get(0).getEntryType() == Constants.ENTRY_TYPE_BACK){
+            UnistorEntry backEntry = content.remove(0);
+            Collections.sort(content, new UnistorEntryComparator());
+            content.add(0, backEntry);
+        }else{
+            Collections.sort(content, new UnistorEntryComparator());
+        }
+
+        // Setting the adapter with the new items.
+        // If the adapter have been previously created, we use notifyDataSetChanged,
+        // which uses pretty less resources than creating a new one.
+        if(this.listView.getAdapter() == null){
+            UnistorEntryListAdapter listViewAdapter = new UnistorEntryListAdapter(mContext, content);
+            this.listView.setAdapter(listViewAdapter);
+            // Set context menu for the listview
+            registerForContextMenu(listView);
+        }else{
+            UnistorEntryListAdapter listViewAdapter = (UnistorEntryListAdapter)this.listView.getAdapter();
+            listViewAdapter.clear();
+            listViewAdapter.addAll(content);
+            listViewAdapter.notifyDataSetChanged();
+        }
+
     }
 
 
