@@ -81,7 +81,7 @@ public class ListContentsAsync extends AsyncTask<Void, Integer, List<UnistorEntr
                     tmp.setEntryType(Constants.ENTRY_TYPE_FOLDER);
                 }else{
                     tmp.setName(entry.fileName());
-                    tmp.setEntryType(Constants.ENTRY_TYPE_TEXT_FILE);
+                    tmp.setEntryType(Constants.ENTRY_TYPE_FILE);
                 }
                 tmp.setPath(entry.path);
                 tmp.setFolder(entry.isDir);

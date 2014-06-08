@@ -8,8 +8,14 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.util.Log;
+import android.webkit.MimeTypeMap;
 import android.widget.Toast;
 
+import com.box.boxandroidlibv2.BoxAndroidClient;
+import com.box.boxjavalibv2.exceptions.AuthFatalFailureException;
+import com.box.boxjavalibv2.exceptions.BoxServerException;
+import com.box.boxjavalibv2.filetransfer.IFileTransferListener;
+import com.box.restclientv2.exceptions.BoxRestException;
 import com.dropbox.client2.DropboxAPI;
 import com.dropbox.client2.ProgressListener;
 import com.dropbox.client2.exception.DropboxException;
@@ -31,39 +37,49 @@ import cen.unistor.app.R;
  */
 public class DownloadFileAsyncTask extends AsyncTask<Void, Long, Boolean> {
 
+    private final String TAG = "DownloadFileAsyncTask";
+
     private ProgressDialog mProgressDialog;
     private Context mContext;
+    private String mFileName;
+    private String mErrorMsg;
+
+    /* Dropbox parameters */
     private DropboxAPI<?> mDBApi;
     private String mRemoteFilePath;
-    private String fileName;
-    private boolean mDoStore;
-    private String mStoringPath;
-    private String mErrorMsg;
-    private FileOutputStream outputStream;
+    private FileOutputStream mOutputStream;
 
-    public DownloadFileAsyncTask(Context context, DropboxAPI<?> DBApi, String filePath){
+    /* Box parameters */
+    private BoxAndroidClient mBoxClient;
+    private String mFileID;
+    private double mFileSize;
+    private BoxProgressListener mBoxProgressListener;
+
+    public DownloadFileAsyncTask(Context context, DropboxAPI<?> DBApi, String filePath, String fileName){
         this.mContext = context;
         this.mDBApi = DBApi;
         this.mRemoteFilePath = filePath;
-        this.fileName = filePath.substring(filePath.lastIndexOf('/')+1);
+        this.mFileName = fileName;
 
     }
 
-    public DownloadFileAsyncTask(Context context, DropboxAPI<?> DBApi, boolean doStore, String storingPath, String filePath){
-        this(context,DBApi,filePath);
-        this.mDoStore = doStore;
-        this.mStoringPath = storingPath;
+    public DownloadFileAsyncTask(Context context, BoxAndroidClient client, String fileID, String fileName, double size){
+        this.mContext = context;
+        this.mBoxClient = client;
+        this.mFileID = fileID;
+        this.mFileName = fileName;
+        this.mFileSize = size;
     }
 
 
     @Override
     protected void onPreExecute() {
         super.onPreExecute();
-        String fileName = mRemoteFilePath.substring(mRemoteFilePath.lastIndexOf('/') + 1);
+
         String btnLbl = mContext.getString(R.string.btn_cancel);
 
         mProgressDialog = new ProgressDialog(mContext);
-        mProgressDialog.setMessage(mContext.getString(R.string.download_dialog_msg) + fileName);
+        mProgressDialog.setMessage(mContext.getString(R.string.download_dialog_msg) + mFileName);
         mProgressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
         mProgressDialog.setCancelable(true);
         mProgressDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
@@ -71,6 +87,8 @@ public class DownloadFileAsyncTask extends AsyncTask<Void, Long, Boolean> {
             public void onCancel(DialogInterface dialogInterface) {
                 Log.i("Info: ", "onCancel fired");
                 cancel(true);
+                mBoxProgressListener.onCanceled();
+                mErrorMsg = mContext.getString(R.string.canceled_msg);
 
             }
         });
@@ -78,16 +96,8 @@ public class DownloadFileAsyncTask extends AsyncTask<Void, Long, Boolean> {
             public void onClick(DialogInterface dialog, int which) {
                 Log.i("Info: ", "Button fired");
                 cancel(true);
+                mBoxProgressListener.onCanceled();
                 mErrorMsg = mContext.getString(R.string.canceled_msg);
-
-                // This will cancel the getThumbnail operation by closing
-                // its stream
-//                if (mFos != null) {
-//                    try {
-//                        mFos.close();
-//                    } catch (IOException e) {
-//                    }
-//                }
             }
         });
 
@@ -97,33 +107,122 @@ public class DownloadFileAsyncTask extends AsyncTask<Void, Long, Boolean> {
     @Override
     protected Boolean doInBackground(Void... voids) {
 
-        try {
-            // Task status check
-            if(isCancelled()){
-                return false;
-            }
+        File localFile;
+        String mimeType;
 
-            // An ouputStream is opened into the app private folder to store the file.
-            outputStream = mContext.openFileOutput(this.fileName, Context.MODE_PRIVATE);
+        if(mBoxClient != null){
+            localFile = this.downloadBoxFile();
+            String extension = mFileName.substring(mFileName.lastIndexOf('.') + 1).toLowerCase();
+            mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
+        }else {
+            DropboxAPI.DropboxFileInfo dropBoxFile = this.downloadDropBoxFile();
+            localFile = new File(mContext.getFilesDir(), this.mFileName);
+            mimeType = dropBoxFile.getMimeType();
+        }
 
-            // File is downloaded via dropbox api. MyProgressListener handles the progress
-            DropboxAPI.DropboxFileInfo file = mDBApi.getFile(mRemoteFilePath, null, outputStream, new MyProgressListener());
-
-            Log.i("Info: ","Download Completed!");
-
+        if( localFile != null) {
             Intent intent = new Intent(Intent.ACTION_VIEW);
-            File newFile = new File(mContext.getFilesDir(), this.fileName);
-            String path = Uri.fromFile(newFile).getPath();
+
+            String path = Uri.fromFile(localFile).getPath();
             Uri fileURI = Uri.parse("content://cen.unistor.app" + path);
-            Log.i("File uri: ",fileURI.getPath());
-            intent.setDataAndType(fileURI, file.getMimeType());
+            Log.i("File uri: ", fileURI.getPath());
+            intent.setDataAndType(fileURI, mimeType);
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             // Task status check
-            if(isCancelled()){
+            if (isCancelled()) {
                 Log.i("Info: ", "If 3");
                 return false;
             }
             mContext.startActivity(intent);
+            return true;
+
+        }else{
+            return false;
+        }
+    }
+
+
+
+    protected void onProgressUpdate(Long... progress) {
+
+        super.onProgressUpdate();
+        int percent = (int)(100.0*(double)progress[0]/progress[1] + 0.5);
+        Log.i("Progress percent", ""+percent);
+        mProgressDialog.setProgress(percent);
+    }
+
+    @Override
+    protected void onPostExecute(Boolean result) {
+        mProgressDialog.dismiss();
+
+        if(result){
+            Toast.makeText(mContext,R.string.download_completed,Toast.LENGTH_LONG).show();
+        }
+    }
+
+
+    @Override
+    protected void onCancelled(Boolean aBoolean) {
+        mProgressDialog.dismiss();
+        if (mOutputStream != null) {
+            try {
+                mOutputStream.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        Log.i("Info: ","Canceled");
+        boolean res = mContext.deleteFile(this.mFileName);
+        if (res){
+            Log.i("Info: ", "File deleted");
+        }
+    }
+
+
+
+    private File downloadBoxFile(){
+        // Task status check
+        if(isCancelled()){
+            return null;
+        }
+
+        File f = new File(mContext.getFilesDir(), this.mFileName);
+        this.mBoxProgressListener = new BoxProgressListener();
+        try {
+            mBoxClient.getFilesManager().downloadFile(this.mFileID, f, this.mBoxProgressListener, null);
+        } catch (BoxRestException e) {
+            e.printStackTrace();
+        } catch (BoxServerException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (AuthFatalFailureException e) {
+            e.printStackTrace();
+        }
+
+        return f;
+    }
+
+
+    private DropboxAPI.DropboxFileInfo downloadDropBoxFile(){
+        DropboxAPI.DropboxFileInfo file = null;
+        try {
+            // Task status check
+            if(isCancelled()){
+                return null;
+            }
+
+            // An ouputStream is opened into the app private folder2 to store the file.
+            mOutputStream = mContext.openFileOutput(this.mFileName, Context.MODE_PRIVATE);
+
+            // File is downloaded via dropbox api. MyProgressListener handles the progress
+            file = mDBApi.getFile(mRemoteFilePath, null, mOutputStream, new DropboxProgressListener());
+
+            Log.i("Info: ","Download Completed!");
+
+
         } catch (DropboxUnlinkedException e) {
             // The AuthSession wasn't properly authenticated or user unlinked.
         } catch (DropboxPartialFileException e) {
@@ -186,55 +285,21 @@ public class DownloadFileAsyncTask extends AsyncTask<Void, Long, Boolean> {
 
         } finally {
             try {
-                outputStream.close();
+                mOutputStream.close();
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
-
-        return true;
-    }
-
-
-
-    protected void onProgressUpdate(Long... progress) {
-
-        super.onProgressUpdate();
-        int percent = (int)(100.0*(double)progress[0]/progress[1] + 0.5);
-        Log.i("Progress percent", ""+percent);
-        mProgressDialog.setProgress(percent);
-    }
-
-    @Override
-    protected void onPostExecute(Boolean result) {
-        mProgressDialog.dismiss();
-
-        if(result){
-            Toast.makeText(mContext,R.string.download_completed,Toast.LENGTH_LONG).show();
-        }
-    }
-
-    @Override
-    protected void onCancelled(Boolean aBoolean) {
-        mProgressDialog.dismiss();
-        try {
-            outputStream.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        Log.i("Info: ","Canceled");
-        boolean res = mContext.deleteFile(this.fileName);
-        if (res){
-            Log.i("Info: ", "File deleted");
-        }
+        return file;
     }
 
     // This class publish the progress of the file download
-    class MyProgressListener extends ProgressListener {
+    class DropboxProgressListener extends ProgressListener {
 
         //Publishes downloaded bytes of the file
         @Override
         public void onProgress(long downloadedBytes, long totalBytes) {
+            Log.i(TAG+". Progress:", ""+downloadedBytes);
             publishProgress(downloadedBytes, totalBytes);
         }
 
@@ -242,6 +307,32 @@ public class DownloadFileAsyncTask extends AsyncTask<Void, Long, Boolean> {
         @Override
         public long progressInterval() {
             return 200;
+        }
+    }
+
+
+    class BoxProgressListener implements IFileTransferListener {
+
+        @Override
+        public void onComplete(String s) {
+            Log.i(TAG, "OnComplete. Status: " + s);
+
+        }
+
+        @Override
+        public void onCanceled() {
+            Log.i(TAG, "onCanceled. Return: ");
+            //return;
+        }
+
+        @Override
+        public void onProgress(long downloadedBytes) {
+            publishProgress(downloadedBytes, (long)mFileSize);
+        }
+
+        @Override
+        public void onIOException(IOException e) {
+            Log.i(TAG, "onIOException. ");
         }
     }
 

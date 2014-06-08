@@ -38,7 +38,7 @@ import cen.unistor.app.asynctask.DownloadFileAsyncTask;
 import cen.unistor.app.asynctask.UploadFileAsyncTask;
 import cen.unistor.app.util.Constants;
 import cen.unistor.app.util.ContentStatus;
-import cen.unistor.app.util.DropboxEntryComparator;
+import cen.unistor.app.util.UnistorEntryComparator;
 
 /**
  * Created by carlos on 10/05/14.
@@ -119,7 +119,8 @@ public class DropboxFragment extends UnistorFragment implements UploadFileAsyncT
                     if (holder.getEntry().getName().contains(".apk")) {
                         Toast.makeText(mContext, R.string.open_apk_error, Toast.LENGTH_LONG).show();
                     } else if (!holder.getEntry().isFolder()) {
-                        DownloadFileAsyncTask downloadTask = new DownloadFileAsyncTask(mContext, mDBApi, holder.getEntry().getPath());
+                        DownloadFileAsyncTask downloadTask
+                                = new DownloadFileAsyncTask(mContext, mDBApi, holder.getEntry().getPath(), holder.getEntry().getName());
                         downloadTask.execute();
                     } else {
                         //TODO backButton historial o parentPath?? --> parentPath implica consumoDAtos
@@ -279,7 +280,7 @@ public class DropboxFragment extends UnistorFragment implements UploadFileAsyncT
                     tmp.setEntryType(Constants.ENTRY_TYPE_FOLDER);
                 }else{
                     tmp.setName(entry.fileName());
-                    tmp.setEntryType(Constants.ENTRY_TYPE_TEXT_FILE);
+                    tmp.setEntryType(Constants.ENTRY_TYPE_FILE);
                 }
                 tmp.setPath(entry.path);
                 tmp.setFolder(entry.isDir);
@@ -346,10 +347,10 @@ public class DropboxFragment extends UnistorFragment implements UploadFileAsyncT
         // is sorted without this item, which will be added in the first position
         if(content.get(0).getEntryType() == Constants.ENTRY_TYPE_BACK){
             UnistorEntry backEntry = content.remove(0);
-            Collections.sort(content, new DropboxEntryComparator());
+            Collections.sort(content, new UnistorEntryComparator());
             content.add(0, backEntry);
         }else{
-            Collections.sort(content, new DropboxEntryComparator());
+            Collections.sort(content, new UnistorEntryComparator());
         }
 
         // Setting the adapter with the new items.
@@ -367,18 +368,6 @@ public class DropboxFragment extends UnistorFragment implements UploadFileAsyncT
             listViewAdapter.notifyDataSetChanged();
         }
 
-    }
-
-
-    @Override
-    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
-        if(v.getId() == R.id.listView){//context_menu_array
-            AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo)menuInfo;
-            String[] menuEntries = getResources().getStringArray(R.array.context_menu_array);
-            for(int i=0;i<menuEntries.length;i++){
-                menu.add(Menu.NONE,i,Menu.NONE,menuEntries[i]);
-            }
-        }
     }
 
     @Override
@@ -409,23 +398,7 @@ public class DropboxFragment extends UnistorFragment implements UploadFileAsyncT
     }
 
 
-    @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-        setHasOptionsMenu(true);
-    }
 
-    @Override
-    public void onPrepareOptionsMenu(Menu menu) {
-        super.onPrepareOptionsMenu(menu);
-        MainActivity activity = (MainActivity)getActivity();
-        if(activity.getCopyMoveAction() != Constants.ACTION_PASTE_DONE){
-            menu.findItem(R.id.action_paste).setVisible(true);
-        }else{
-            menu.findItem(R.id.action_paste).setVisible(false);
-        }
-
-    }
 
     private void deleteElement(String path){
 

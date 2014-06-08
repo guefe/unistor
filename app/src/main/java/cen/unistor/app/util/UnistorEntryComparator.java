@@ -7,7 +7,7 @@ import cen.unistor.app.adapter.UnistorEntry;
 /**
  * Created by carlos on 21/05/14.
  */
-public class DropboxEntryComparator implements Comparator<UnistorEntry> {
+public class UnistorEntryComparator implements Comparator<UnistorEntry> {
 
     @Override
     /**
@@ -19,7 +19,14 @@ public class DropboxEntryComparator implements Comparator<UnistorEntry> {
         }else if (!unistorEntry.isFolder() && unistorEntry2.isFolder()){
             return 1;
         }else{
-            return unistorEntry.getName().compareTo(unistorEntry2.getName());
+            String ext1 = unistorEntry.getName().substring(unistorEntry.getName().lastIndexOf('.')+1).toLowerCase();
+            String ext2 = unistorEntry2.getName().substring(unistorEntry2.getName().lastIndexOf('.')+1).toLowerCase();
+            if (ext1.compareTo(ext2) != 0){
+                return ext1.compareTo(ext2);
+            }else{
+                return unistorEntry.getName().compareToIgnoreCase(unistorEntry2.getName());
+            }
+
         }
     }
 }

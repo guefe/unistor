@@ -19,6 +19,7 @@ public class ContentStatus implements Parcelable{
     private String statusHash;
     private String path;
 
+    public ContentStatus (){}
 
     public ContentStatus(ArrayList<UnistorEntry> content, String statusHash, String path) {
         this.content = content;

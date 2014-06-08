@@ -4,6 +4,8 @@ import android.content.Context;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+
 import cen.unistor.app.R;
 import cen.unistor.app.util.Constants;
 
@@ -15,17 +17,19 @@ public class UnistorEntry implements Parcelable {
     private int entryType;
     private String path;
     private boolean isFolder;
+    private double size;
 
 
     public UnistorEntry(){
 
     }
 
-    public UnistorEntry(String name, int entryType, String path, boolean isFolder) {
+    public UnistorEntry(String name, int entryType, String path, boolean isFolder, double size) {
         this.name = name;
         this.entryType = entryType;
         this.path = path;
         this.isFolder = isFolder;
+        this.size = size;
     }
 
     public UnistorEntry(Parcel in){
@@ -33,6 +37,7 @@ public class UnistorEntry implements Parcelable {
         this.entryType = in.readInt();
         this.path = in.readString();
         this.isFolder = in.readInt() == 1;
+        this.size = in.readDouble();
     }
 
     public String getName() {
@@ -67,6 +72,13 @@ public class UnistorEntry implements Parcelable {
         this.isFolder = isFolder;
     }
 
+    public double getSize() {
+        return size;
+    }
+
+    public void setSize(double size) {
+        this.size = size;
+    }
 
     /**
      * Return the icon identifier according the entry type
@@ -77,15 +89,13 @@ public class UnistorEntry implements Parcelable {
 
         String extension = this.getName().substring(this.getName().lastIndexOf('.')+1).toLowerCase();
 
-
-
         switch (getEntryType()){
             case Constants.ENTRY_TYPE_FOLDER:
                 iconID = R.drawable.folder;
                 break;
 
-            case Constants.ENTRY_TYPE_VIDEO:
-                iconID = R.drawable.video;
+            case Constants.ENTRY_TYPE_BOOKMARK:
+                iconID = R.drawable.bookmark;
                 break;
 
             case Constants.ENTRY_TYPE_BACK:
@@ -133,5 +143,8 @@ public class UnistorEntry implements Parcelable {
         parcel.writeInt(this.getEntryType());
         parcel.writeString(this.getPath());
         parcel.writeInt(this.isFolder() ? 1 : 0 );
+        parcel.writeDouble(this.getSize());
     }
+
+
 }

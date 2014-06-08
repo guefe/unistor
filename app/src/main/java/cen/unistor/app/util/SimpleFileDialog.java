@@ -277,7 +277,7 @@ public class SimpleFileDialog
 				{
 					final EditText input = new EditText(m_context);
 
-					// Show new folder name input dialog
+					// Show new folder2 name input dialog
 					new AlertDialog.Builder(m_context).
 					setTitle("New Folder Name").
 					setView(input).setPositiveButton("OK", new DialogInterface.OnClickListener() 
@@ -296,7 +296,7 @@ public class SimpleFileDialog
 							else
 							{
 								Toast.makeText(	m_context, "Failed to create '" 
-										+ newDirName + "' folder", Toast.LENGTH_SHORT).show();
+										+ newDirName + "' folder2", Toast.LENGTH_SHORT).show();
 							}
 						}
 					}).setNegativeButton("Cancel", null).show(); 
@@ -307,7 +307,7 @@ public class SimpleFileDialog
 		}
 
 		/////////////////////////////////////////////////////
-		// Create View with folder path and entry text box // 
+		// Create View with folder2 path and entry text box //
 		/////////////////////////////////////////////////////
 		LinearLayout titleLayout = new LinearLayout(m_context);
 		titleLayout.setOrientation(LinearLayout.VERTICAL);
