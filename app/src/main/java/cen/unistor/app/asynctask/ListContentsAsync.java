@@ -132,7 +132,7 @@ public class ListContentsAsync extends AsyncTask<Void, Integer, List<UnistorEntr
             mErrorMsg = mContext.getString(R.string.dropbox_parse_excp_msg);
         } catch (DropboxException e) {
             // Unknown error
-            mErrorMsg = mContext.getString(R.string.dropbox_excp_msg);
+            mErrorMsg = mContext.getString(R.string.excp_msg);
         }
         Collections.sort(entryList, new EntryComparator());
 //        Collections.sort(folderList);

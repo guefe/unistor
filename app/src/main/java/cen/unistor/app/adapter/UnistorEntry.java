@@ -4,8 +4,6 @@ import android.content.Context;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-
 import cen.unistor.app.R;
 import cen.unistor.app.util.Constants;
 

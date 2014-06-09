@@ -11,12 +11,13 @@
     <!-- Dropbox error messages -->
     <string name="dropbox_IO_excp_msg">Error en la red, inténtelo de nuevo.</string>
     <string name="dropbox_parse_excp_msg">Error de Dropbox.  Pruebe de nuevo.</string>
-    <string name="dropbox_excp_msg">Error desconocido. Pruebe de nuevo.</string>
     <string name="dropbox_403_forbidden_msg">Error. Imposible realizar la acción solicitada.</string>
     <string name="dropbox_502_bad_gateway">Dropbox parece estar caído...</string>
     <string name="dropbox_503_service_unavailable">Dropbox parece estar caído...</string>
     <string name="dropbox_507_insufficient_storage_msg">Espacio en cuenta insuficiente.</string>
     <string name="dropbox_404_not_found">No se encuentra el recurso.</string>
+
+    <string name="excp_msg">Error desconocido. Pruebe de nuevo.</string>
     <string name="upload_dialog_msg">Subiendo: </string>
     <string name="download_dialog_msg">Descargando: </string>
     <string name="canceled_msg">Cancelado</string>

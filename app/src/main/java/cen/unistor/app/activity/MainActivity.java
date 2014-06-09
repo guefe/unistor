@@ -40,6 +40,7 @@ public class MainActivity extends ActionBarActivity {
      */
     ViewPager mViewPager;
 
+    private String nameFileToCopy;
     private String pathToCopyMove;
     // Initialize action to the default value, used when there is no action to do.
     private int copyMoveAction = Constants.ACTION_PASTE_DONE;
@@ -140,9 +141,12 @@ public class MainActivity extends ActionBarActivity {
     public void pasteFile(){
         UnistorFragment fragment = (UnistorFragment)getSupportFragmentManager().getFragments().get(mViewPager.getCurrentItem());
 
-        fragment.pasteFile(this.getPathToCopyMove(), this.copyMoveAction);
+        boolean result =fragment.pasteFile(this.getPathToCopyMove(), nameFileToCopy, this.copyMoveAction);
 
-        this.copyMoveAction = Constants.ACTION_PASTE_DONE;
+        if(result){
+            this.copyMoveAction = Constants.ACTION_PASTE_DONE;
+        }
+
 
 
     }
@@ -178,6 +182,14 @@ public class MainActivity extends ActionBarActivity {
     public void setPathToMove(String path) {
         this.pathToCopyMove = path;
         this.copyMoveAction = Constants.ACTION_MOVE;
+    }
+
+    public String getNameFileToCopy() {
+        return nameFileToCopy;
+    }
+
+    public void setNameFileToCopy(String nameFileToCopy) {
+        this.nameFileToCopy = nameFileToCopy;
     }
 
     /**
@@ -273,9 +285,10 @@ public class MainActivity extends ActionBarActivity {
         }
 
         @Override
-        public boolean pasteFile(String source, int mode) {
+        public boolean pasteFile(String source, String name, int mode) {
             return false;
         }
+
 
         @Override
         protected void deleteElement(String path) {

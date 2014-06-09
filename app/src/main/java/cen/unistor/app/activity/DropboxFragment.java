@@ -21,6 +21,7 @@ import com.dropbox.client2.exception.DropboxUnlinkedException;
 import com.dropbox.client2.session.AccessTokenPair;
 import com.dropbox.client2.session.AppKeyPair;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Stack;
 
@@ -35,7 +36,7 @@ import cen.unistor.app.util.ContentStatus;
 /**
  * Created by carlos on 10/05/14.
  */
-public class DropboxFragment extends UnistorFragment implements UploadFileAsyncTask.OnUploadFinishedListener{
+public class DropboxFragment extends UnistorFragment{
 
 
     private final String TAG = "DropboxFragment";
@@ -145,11 +146,7 @@ public class DropboxFragment extends UnistorFragment implements UploadFileAsyncT
 
     }
 
-    @Override
-    public void onSaveInstanceState(Bundle outState) {
-        outState.putParcelableArrayList("currentContent", this.currentContent);
-        outState.putString("currentPath", currentPath);
-    }
+
 
     private AndroidAuthSession buildSession() {
         AppKeyPair appKeyPair = new AppKeyPair(APP_KEY, APP_SECRET);
@@ -260,6 +257,7 @@ public class DropboxFragment extends UnistorFragment implements UploadFileAsyncT
 
             // Building UnistorEntry array with metadata result.
             for(DropboxAPI.Entry entry: root.contents){
+
                 tmp = new UnistorEntry();
                 if(entry.isDir){
                     tmp.setName(entry.path.substring(entry.path.lastIndexOf('/')+1));
@@ -318,7 +316,7 @@ public class DropboxFragment extends UnistorFragment implements UploadFileAsyncT
             mErrorMsg = mContext.getString(R.string.dropbox_parse_excp_msg);
         } catch (DropboxException e) {
             // Unknown error
-            mErrorMsg = mContext.getString(R.string.dropbox_excp_msg);
+            mErrorMsg = mContext.getString(R.string.excp_msg);
         }
         return entryList;
     }
@@ -370,7 +368,7 @@ public class DropboxFragment extends UnistorFragment implements UploadFileAsyncT
             mErrorMsg = mContext.getString(R.string.dropbox_parse_excp_msg);
         } catch (DropboxException e) {
             // Unknown error
-            mErrorMsg = mContext.getString(R.string.dropbox_excp_msg);
+            mErrorMsg = mContext.getString(R.string.excp_msg);
         }
     }
 
@@ -392,27 +390,20 @@ public class DropboxFragment extends UnistorFragment implements UploadFileAsyncT
 
     @Override
     public boolean uploadFile(String path) {
-        UploadFileAsyncTask task = new UploadFileAsyncTask(mContext, mDBApi, path, currentPath, this);
+        UploadFileAsyncTask task = new UploadFileAsyncTask(mContext, mDBApi, new File(path), currentPath, this);
         task.execute();
         return true;
     }
 
-    /**
-     * Listener to refresh data when upload finishes
-     */
-    @Override
-    public void onUploadFinish() {
-        currentContent = this.loadContent(currentPath);
-        populateContentListView(currentContent);
-    }
+
 
 
     @Override
-    public boolean pasteFile(String source, int mode) {
+    public boolean pasteFile(String source, String namefile, int mode) {
         boolean result = false;
         try {
-            String namefile = source.substring(source.lastIndexOf('/'));
-            String dest = this.currentPath.concat(namefile);
+            //String namefile = source.substring(source.lastIndexOf('/'));
+            String dest = this.currentPath.concat("/"+namefile);
 
             switch (mode) {
                 case Constants.ACTION_COPY:
@@ -467,7 +458,7 @@ public class DropboxFragment extends UnistorFragment implements UploadFileAsyncT
             mErrorMsg = mContext.getString(R.string.dropbox_IO_excp_msg);
         }catch (DropboxException e) {
             // Unknown error
-            mErrorMsg = mContext.getString(R.string.dropbox_excp_msg);
+            mErrorMsg = mContext.getString(R.string.excp_msg);
         }
 
         if(mErrorMsg != null){

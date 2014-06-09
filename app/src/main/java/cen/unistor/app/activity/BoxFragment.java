@@ -25,6 +25,7 @@ import com.box.boxjavalibv2.exceptions.BoxServerException;
 import com.box.boxjavalibv2.jsonparsing.BoxJSONParser;
 import com.box.boxjavalibv2.jsonparsing.IBoxJSONParser;
 import com.box.boxjavalibv2.jsonparsing.IBoxResourceHub;
+import com.box.boxjavalibv2.requests.requestobjects.BoxItemCopyRequestObject;
 import com.box.boxjavalibv2.requests.requestobjects.BoxPagingRequestObject;
 import com.box.restclientv2.exceptions.BoxRestException;
 
@@ -39,33 +40,29 @@ import cen.unistor.app.adapter.UnistorEntry;
 import cen.unistor.app.adapter.ViewHolder;
 import cen.unistor.app.asynctask.DownloadFileAsyncTask;
 import cen.unistor.app.asynctask.UploadFileAsyncTask;
-import cen.unistor.app.asynctask.UploadFileAsyncTask.OnUploadFinishedListener;
 import cen.unistor.app.util.Constants;
 import cen.unistor.app.util.ContentStatus;
 
 /**
  * Created by carlos on 5/06/14.
  */
-public class BoxFragment extends UnistorFragment implements OnUploadFinishedListener {
+public class BoxFragment extends UnistorFragment{
 
     private final String TAG = "BoxFragment";
 
     private final String CLIENT_ID = "trybv0asmi4v693ildrqpakn1642x5q5";
     private final String CLIENT_SECRET = "jBhlEPtO8Hat0WSczsDx9PVmetjJfMjd";
-    private final String REDIRECT_URI="http://localhost";
+    private final String REDIRECT_URI = "http://localhost";
 
     private final String AUTH_KEY = "AUTH_KEY";
     private final static int AUTH_REQUEST = 1;
-    private final static int UPLOAD_REQUEST = 2;
-    private final static int DOWNLOAD_REQUEST = 3;
 
     private BoxAndroidClient mBoxClient;
 
+    private String previousPath;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-
-
 
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
         listView = (ListView)rootView.findViewById(R.id.listView);
@@ -73,6 +70,12 @@ public class BoxFragment extends UnistorFragment implements OnUploadFinishedList
         statusHistory = new Stack<ContentStatus>();
         // Initilize with the ID of the root folder.
         currentPath = "0";
+
+        if (savedInstanceState != null){
+            currentContent = savedInstanceState.getParcelableArrayList("currentContent");
+            currentPath = savedInstanceState.getString("currentPath");
+            //statusHistory = savedInstanceState.put
+        }
 
         startAuthentication();
         return rootView;
@@ -85,8 +88,7 @@ public class BoxFragment extends UnistorFragment implements OnUploadFinishedList
         super.onResume();
 
         if(mBoxClient != null){
-            ArrayList<UnistorEntry> content = loadContent(this.currentPath);
-            populateContentListView(content);
+
 
             listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
@@ -101,23 +103,32 @@ public class BoxFragment extends UnistorFragment implements OnUploadFinishedList
 
                         downloadTask.execute();
                     } else {
-                        //TODO backButton historial o parentPath?? --> parentPath implica consumoDAtos
+                        //TODO backButton historial o parentPath?? --> parentPath implica consumoDatos
                         ContentStatus currentStatus = new ContentStatus(
                                 new ArrayList<UnistorEntry>(currentContent),
                                 null,
-                                currentPath);
+                                new String(currentPath));
                         statusHistory.push(currentStatus);
+                        previousPath = currentPath;
                         currentContent = loadContent(holder.getEntry().getPath());
                         populateContentListView(currentContent);
                     }
 
                 }
             });
+
+            if(currentContent == null || currentContent.isEmpty()) {
+                currentContent = loadContent(this.currentPath);
+
+            }
+            populateContentListView(currentContent);
         }
 
 
 
     }
+
+
 
     public void startAuthentication(){
         BoxAndroidOAuthData oauth = loadSavedAuth();
@@ -171,7 +182,6 @@ public class BoxFragment extends UnistorFragment implements OnUploadFinishedList
             itemFields.add(BoxItem.FIELD_MODIFIED_AT);
             itemFields.add(BoxItem.FIELD_PARENT);
             requestObject.getRequestExtras().addFields(itemFields);
-            BoxItem folder = this.mBoxClient.getFoldersManager().getFolder(folderID,requestObject);
             BoxCollection itemCollection = this.mBoxClient.getFoldersManager().getFolderItems(folderID, requestObject);
 
             // Building back entry into the entry list
@@ -180,7 +190,7 @@ public class BoxFragment extends UnistorFragment implements OnUploadFinishedList
             if(!folderID.equals("0")){
                 entry = new UnistorEntry();
                 entry.setName("Volver...");
-                entry.setPath(folderID);
+                entry.setPath(previousPath);
                 entry.setFolder(true);
                 entry.setEntryType(Constants.ENTRY_TYPE_BACK);
                 entryList.add(entry);
@@ -208,10 +218,10 @@ public class BoxFragment extends UnistorFragment implements OnUploadFinishedList
 
                 String extension = item.getName().substring(item.getName().lastIndexOf('.') + 1).toLowerCase();
 
-                String mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
-                Log.i(TAG, item.getName() + ": " + mimeType);
                 entryList.add(entry);
             }
+
+            currentPath = folderID;
             //TODO error handling
         } catch (BoxRestException e) {
             e.printStackTrace();
@@ -224,11 +234,6 @@ public class BoxFragment extends UnistorFragment implements OnUploadFinishedList
         return entryList;
     }
 
-
-    @Override
-    public void onUploadFinish() {
-
-    }
 
     @Override
     public boolean keyBackPressed(){
@@ -254,8 +259,29 @@ public class BoxFragment extends UnistorFragment implements OnUploadFinishedList
     }
 
     @Override
-    public boolean pasteFile(String source, int mode) {
-        return false;
+    public boolean pasteFile(String source, String name, int mode) {
+
+        try {
+            BoxItemCopyRequestObject copyRequestObject = BoxItemCopyRequestObject.copyItemRequestObject(currentPath);
+            copyRequestObject.setName(name);
+            mBoxClient.getFilesManager().copyFile(source, copyRequestObject);
+
+            if( mode == Constants.ACTION_MOVE ){
+                deleteElement(source);
+            }
+
+            // Refresh the current view to reflect the changes
+            this.currentContent = loadContent(this.currentPath);
+            populateContentListView(this.currentContent);
+        } catch (BoxRestException e) {
+            e.printStackTrace();
+        } catch (BoxServerException e) {
+            e.printStackTrace();
+        } catch (AuthFatalFailureException e) {
+            e.printStackTrace();
+        }
+
+        return true;
     }
 
 

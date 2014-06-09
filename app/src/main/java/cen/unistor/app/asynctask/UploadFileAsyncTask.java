@@ -12,6 +12,7 @@ import com.box.boxandroidlibv2.BoxAndroidClient;
 import com.box.boxjavalibv2.exceptions.AuthFatalFailureException;
 import com.box.boxjavalibv2.exceptions.BoxJSONException;
 import com.box.boxjavalibv2.exceptions.BoxServerException;
+import com.box.boxjavalibv2.filetransfer.IFileTransferListener;
 import com.box.restclientv2.exceptions.BoxRestException;
 import com.box.restclientv2.requestsbase.BoxFileUploadRequestObject;
 import com.dropbox.client2.DropboxAPI;
@@ -26,6 +27,7 @@ import com.dropbox.client2.exception.DropboxServerException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 
 import cen.unistor.app.R;
@@ -38,41 +40,49 @@ import cen.unistor.app.R;
 
 public class UploadFileAsyncTask extends AsyncTask<Void, Long, Boolean> {
 
-    // Interface to be implemented by the fragment to have a notice
-    // when the upload has finished.
+
+
+    /**
+     * Interface to be implemented by the fragment to have a notice
+     * when the upload has finished.
+     */
     public interface OnUploadFinishedListener{
+        /**
+         * Performs an action when the file upload has finished,
+         * typically refresh the adapter.
+         */
         public void onUploadFinish();
     }
+
+    private final String TAG = "UploadFileAsyncTask";
 
     private ProgressDialog mProgressDialog;
     private OnUploadFinishedListener finishListener;
     private Context mContext;
 
     /* Path in dropbox, id in Box */
-    private String mSourcePath;
     private String mDestPath;
+    private File mSourceFile;
 
     /* Dropbox parameters */
     private DropboxAPI<?> mDBApi;
     private String mFileName;
     private DropboxAPI.UploadRequest mUploadRequest;
 
-
     /* Box parameters */
     private BoxAndroidClient mBoxClient;
-    private File mSourceFile;
-
+    private double mFileSize;
 
 
     private String mErrorMsg;
 
 
-    public UploadFileAsyncTask(Context context, DropboxAPI<?> dbapi, String sourcePath, String mDestPath, OnUploadFinishedListener listener){
+    public UploadFileAsyncTask(Context context, DropboxAPI<?> dbapi, File file, String mDestPath, OnUploadFinishedListener listener){
         this.mContext = context;
         this.mDBApi = dbapi;
-        this.mSourcePath = sourcePath;
+        this.mSourceFile = file;
         this.mDestPath = mDestPath;
-        this.mFileName = sourcePath.substring(sourcePath.lastIndexOf('/')+1);
+        this.mFileName = file.getName();
         this.finishListener = listener;
     }
 
@@ -81,6 +91,7 @@ public class UploadFileAsyncTask extends AsyncTask<Void, Long, Boolean> {
         this.mBoxClient = client;
         this.mSourceFile = file;
         this.mFileName = file.getName();
+        this.mFileSize = file.length();
         this.mDestPath = parentID;
         this.finishListener = listener;
     }
@@ -110,14 +121,6 @@ public class UploadFileAsyncTask extends AsyncTask<Void, Long, Boolean> {
                 mUploadRequest.abort();
                 mErrorMsg = mContext.getString(R.string.canceled_msg);
 
-                // This will cancel the getThumbnail operation by closing
-                // its stream
-//                if (mFos != null) {
-//                    try {
-//                        mFos.close();
-//                    } catch (IOException e) {
-//                    }
-//                }
             }
         });
 
@@ -126,22 +129,66 @@ public class UploadFileAsyncTask extends AsyncTask<Void, Long, Boolean> {
 
     @Override
     protected Boolean doInBackground(Void... voids) {
-        boolean result = false;
+        // Task status check
+        if(isCancelled()){
+            Log.i("Info: ", "If 2");
+            return false;
+        }
+
+        if(mBoxClient != null){
+            this.uploadBoxElement();
+
+        }else{
+            this.uploadDropboxElement();
+        }
+
+
+        return true;
+
+    }
+
+
+    protected void onProgressUpdate(Long... progress) {
+
+        super.onProgressUpdate();
+        int percent = (int)(100.0*(double)progress[0]/progress[1] + 0.5);
+        Log.i("Progress percent", ""+percent);
+        mProgressDialog.setProgress(percent);
+    }
+
+
+
+
+
+    @Override
+    protected void onPostExecute(Boolean result) {
+        mProgressDialog.dismiss();
+
+        if(result){
+            Toast.makeText(mContext, R.string.upload_completed, Toast.LENGTH_LONG).show();
+            finishListener.onUploadFinish();
+        }else{
+            Toast.makeText(mContext, mErrorMsg, Toast.LENGTH_LONG).show();
+        }
+    }
+
+    @Override
+    protected void onCancelled() {
+        mProgressDialog.dismiss();
+        Toast.makeText(mContext, mErrorMsg, Toast.LENGTH_LONG).show();
+
+    }
+
+
+    private void uploadDropboxElement(){
         try {
-            // Task status check
-            if(isCancelled()){
-                Log.i("Info: ", "If 2");
-                return false;
-            }
 
-            File file = new File(mSourcePath);
-            InputStream stream = new FileInputStream(file);
+            InputStream stream = new FileInputStream(mSourceFile);
 
-            this.mUploadRequest = this.mDBApi.putFileRequest(mDestPath+this.mFileName, stream, file.length(), null, new MyProgressListener());
+            this.mUploadRequest = this.mDBApi.putFileRequest(mDestPath+this.mFileName, stream, mSourceFile.length(), null, new DropboxProgressListener());
 
             this.mUploadRequest.upload();
             //this.mDBApi.putFile(mDestPath+this.mFileName, stream, DropboxAPI.MAX_UPLOAD_SIZE + 1024, null, new MyProgressListener());
-            result = true;
 
         } catch (FileNotFoundException e) {
             mErrorMsg = mContext.getString(R.string.file_not_found);
@@ -197,52 +244,22 @@ public class UploadFileAsyncTask extends AsyncTask<Void, Long, Boolean> {
             mErrorMsg = mContext.getString(R.string.dropbox_filesize_exp_msg)+"("+ DropboxAPI.MAX_UPLOAD_SIZE/conversionFactor +")";
         } catch (DropboxException e) {
             // Unknown error
-            mErrorMsg = mContext.getString(R.string.dropbox_excp_msg);
+            mErrorMsg = mContext.getString(R.string.excp_msg);
         }finally {
-
+            if(mErrorMsg == null){
+                // Unknown error
+                mErrorMsg = mContext.getString(R.string.excp_msg);
+            }
         }
-
-        return result;
-
-    }
-
-
-    protected void onProgressUpdate(Long... progress) {
-
-        super.onProgressUpdate();
-        int percent = (int)(100.0*(double)progress[0]/progress[1] + 0.5);
-        Log.i("Progress percent", ""+percent);
-        mProgressDialog.setProgress(percent);
-    }
-
-
-
-
-
-    @Override
-    protected void onPostExecute(Boolean result) {
-        mProgressDialog.dismiss();
-
-        if(result){
-            Toast.makeText(mContext, R.string.upload_completed, Toast.LENGTH_LONG).show();
-            finishListener.onUploadFinish();
-        }else{
-            Toast.makeText(mContext, mErrorMsg, Toast.LENGTH_LONG).show();
-        }
-    }
-
-    @Override
-    protected void onCancelled() {
-        mProgressDialog.dismiss();
-        Toast.makeText(mContext, mErrorMsg, Toast.LENGTH_LONG).show();
-
     }
 
 
     private void uploadBoxElement(){
 
         try {
-            BoxFileUploadRequestObject uploadRequestObject = BoxFileUploadRequestObject.uploadFileRequestObject(mDestPath, mFileName, mSourceFile);
+            BoxFileUploadRequestObject uploadRequestObject
+                    = BoxFileUploadRequestObject.uploadFileRequestObject(mDestPath, mFileName, mSourceFile);
+            uploadRequestObject.setListener(new BoxProgressListener());
             mBoxClient.getFilesManager().uploadFile(uploadRequestObject);
 
             //TODO error handling
@@ -256,6 +273,11 @@ public class UploadFileAsyncTask extends AsyncTask<Void, Long, Boolean> {
             e.printStackTrace();
         } catch (AuthFatalFailureException e) {
             e.printStackTrace();
+        } finally {
+            if(mErrorMsg == null){
+                // Unknown error
+                mErrorMsg = mContext.getString(R.string.excp_msg);
+            }
         }
 
     }
@@ -263,7 +285,7 @@ public class UploadFileAsyncTask extends AsyncTask<Void, Long, Boolean> {
 
 
     // This class publish the progress of the file download
-    class MyProgressListener extends ProgressListener {
+    class DropboxProgressListener extends ProgressListener {
 
         //Publishes downloaded bytes of the file
         @Override
@@ -275,6 +297,32 @@ public class UploadFileAsyncTask extends AsyncTask<Void, Long, Boolean> {
         @Override
         public long progressInterval() {
             return 200;
+        }
+    }
+
+
+    class BoxProgressListener implements IFileTransferListener {
+
+        @Override
+        public void onComplete(String s) {
+            Log.i(TAG, "OnComplete. Status: " + s);
+
+        }
+
+        @Override
+        public void onCanceled() {
+            Log.i(TAG, "onCanceled. Return: ");
+            //return;
+        }
+
+        @Override
+        public void onProgress(long downloadedBytes) {
+            publishProgress(downloadedBytes, (long)mFileSize);
+        }
+
+        @Override
+        public void onIOException(IOException e) {
+            Log.i(TAG, "onIOException. ");
         }
     }
 

@@ -200,6 +200,7 @@ public class DownloadFileAsyncTask extends AsyncTask<Void, Long, Boolean> {
         } catch (IOException e) {
             e.printStackTrace();
         } catch (InterruptedException e) {
+            mErrorMsg = mContext.getString(R.string.canceled_msg);
             e.printStackTrace();
         } catch (AuthFatalFailureException e) {
             e.printStackTrace();
@@ -277,7 +278,7 @@ public class DownloadFileAsyncTask extends AsyncTask<Void, Long, Boolean> {
 
         } catch (DropboxException e) {
             // Unknown error
-            mErrorMsg = mContext.getString(R.string.dropbox_excp_msg);
+            mErrorMsg = mContext.getString(R.string.excp_msg);
 
         }catch (FileNotFoundException e){
             mErrorMsg = mContext.getString(R.string.file_not_found);

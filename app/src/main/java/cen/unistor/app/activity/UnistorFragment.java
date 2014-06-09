@@ -2,6 +2,7 @@ package cen.unistor.app.activity;
 
 import android.app.Activity;
 import android.content.Context;
+import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.ContextMenu;
 import android.view.Menu;
@@ -18,6 +19,7 @@ import cen.unistor.app.R;
 import cen.unistor.app.adapter.UnistorEntry;
 import cen.unistor.app.adapter.UnistorEntryListAdapter;
 import cen.unistor.app.adapter.ViewHolder;
+import cen.unistor.app.asynctask.UploadFileAsyncTask;
 import cen.unistor.app.util.Constants;
 import cen.unistor.app.util.ContentStatus;
 import cen.unistor.app.util.UnistorEntryComparator;
@@ -25,7 +27,7 @@ import cen.unistor.app.util.UnistorEntryComparator;
 /**
  * Created by carlos on 26/05/14.
  */
-public abstract class UnistorFragment extends Fragment{
+public abstract class UnistorFragment extends Fragment implements UploadFileAsyncTask.OnUploadFinishedListener{
 
     protected Context mContext;
     protected ListView listView;
@@ -41,14 +43,22 @@ public abstract class UnistorFragment extends Fragment{
 
     public abstract boolean uploadFile(String path);
 
-    public abstract boolean pasteFile(String source, int mode);
+    public abstract boolean pasteFile(String source, String name, int mode);
 
     protected abstract void deleteElement(String path);
+
+    protected abstract ArrayList<UnistorEntry> loadContent(String path);
 
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
         setHasOptionsMenu(true);
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        outState.putParcelableArrayList("currentContent", this.currentContent);
+        outState.putString("currentPath", currentPath);
     }
 
     @Override
@@ -89,10 +99,12 @@ public abstract class UnistorFragment extends Fragment{
             switch (item.getItemId()){
                 case 0:// Copy
                     ((MainActivity)getActivity()).setPathToCopy(itemViewHolder.getEntry().getPath());
+                    ((MainActivity)getActivity()).setNameFileToCopy(itemViewHolder.getEntry().getName());
                     getActivity().invalidateOptionsMenu();
                     break;
                 case 1:// Move
                     ((MainActivity)getActivity()).setPathToMove(itemViewHolder.getEntry().getPath());
+                    ((MainActivity)getActivity()).setNameFileToCopy(itemViewHolder.getEntry().getName());
                     getActivity().invalidateOptionsMenu();
                     break;
                 case 2:// Delete
@@ -109,7 +121,7 @@ public abstract class UnistorFragment extends Fragment{
 
 
 
-    protected abstract ArrayList<UnistorEntry> loadContent(String path);
+
 
 
     /**
@@ -143,6 +155,16 @@ public abstract class UnistorFragment extends Fragment{
             listViewAdapter.notifyDataSetChanged();
         }
 
+    }
+
+
+    /**
+     * Listener to refresh data when upload finishes
+     */
+    @Override
+    public void onUploadFinish() {
+        currentContent = this.loadContent(currentPath);
+        populateContentListView(currentContent);
     }
 
 
