@@ -16,18 +16,23 @@ public class UnistorEntry implements Parcelable {
     private String path;
     private boolean isFolder;
     private double size;
+    private String sizeString;
+    private String lastModification;
 
 
     public UnistorEntry(){
 
     }
 
-    public UnistorEntry(String name, int entryType, String path, boolean isFolder, double size) {
+    public UnistorEntry(String name, int entryType, String path, boolean isFolder,
+                        double size, String sizeString, String lastModification) {
         this.name = name;
         this.entryType = entryType;
         this.path = path;
         this.isFolder = isFolder;
         this.size = size;
+        this.sizeString = sizeString;
+        this.lastModification = lastModification;
     }
 
     public UnistorEntry(Parcel in){
@@ -36,6 +41,8 @@ public class UnistorEntry implements Parcelable {
         this.path = in.readString();
         this.isFolder = in.readInt() == 1;
         this.size = in.readDouble();
+        this.sizeString = in.readString();
+        this.lastModification = in.readString();
     }
 
     public String getName() {
@@ -76,6 +83,22 @@ public class UnistorEntry implements Parcelable {
 
     public void setSize(double size) {
         this.size = size;
+    }
+
+    public String getLastModification() {
+        return lastModification;
+    }
+
+    public void setLastModification(String lastModification) {
+        this.lastModification = lastModification;
+    }
+
+    public String getSizeString() {
+        return sizeString;
+    }
+
+    public void setSizeString(String sizeString) {
+        this.sizeString = sizeString;
     }
 
     /**
@@ -140,9 +163,12 @@ public class UnistorEntry implements Parcelable {
         parcel.writeString(this.getName());
         parcel.writeInt(this.getEntryType());
         parcel.writeString(this.getPath());
-        parcel.writeInt(this.isFolder() ? 1 : 0 );
+        parcel.writeInt(this.isFolder() ? 1 : 0);
         parcel.writeDouble(this.getSize());
+        parcel.writeString(this.getSizeString());
+        parcel.writeString(this.getLastModification());
     }
+
 
 
 }

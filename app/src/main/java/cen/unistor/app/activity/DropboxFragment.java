@@ -45,8 +45,8 @@ public class DropboxFragment extends UnistorFragment{
     private static final String APP_SECRET = "m1aki6lwux6phy5";
 
 
-    private static final String ACCESS_KEY_NAME = "ACCESS_KEY";
-    private static final String ACCESS_SECRET_NAME = "ACCESS_SECRET";
+    private static final String DROPBOX_ACCESS_KEY = "DROPBOX_ACCESS_KEY";
+    private static final String DROPBOX_ACCESS_SECRET = "DROPBOX_ACCESS_SECRET";
 
     private DropboxAPI<AndroidAuthSession> mDBApi;
 
@@ -134,10 +134,18 @@ public class DropboxFragment extends UnistorFragment{
                 loggedIn = true;
                 // Store it locally in our app for later use
                 storeAuth(mDBApi.getSession());
+
+                if(currentContent == null || currentContent.isEmpty()) {
+                    currentContent = loadContent(this.currentPath);
+
+                }
+                populateContentListView(currentContent);
             } catch (IllegalStateException e) {
                 Log.i("DbAuthLog", "Error authenticating", e);
             }
         }
+
+
     }
 
     @Override
@@ -163,8 +171,8 @@ public class DropboxFragment extends UnistorFragment{
      */
     private void loadAuth(AndroidAuthSession session) {
         SharedPreferences prefs = getActivity().getSharedPreferences(Constants.PREFS_NAME, 0);
-        String key = prefs.getString(ACCESS_KEY_NAME, null);
-        String secret = prefs.getString(ACCESS_SECRET_NAME, null);
+        String key = prefs.getString(DROPBOX_ACCESS_KEY, null);
+        String secret = prefs.getString(DROPBOX_ACCESS_SECRET, null);
         if (key == null || secret == null || key.length() == 0 || secret.length() == 0) return;
 
         if (key.equals("oauth2:")) {
@@ -187,8 +195,8 @@ public class DropboxFragment extends UnistorFragment{
         if (oauth2AccessToken != null) {
             SharedPreferences prefs = getActivity().getSharedPreferences(Constants.PREFS_NAME, 0);
             SharedPreferences.Editor edit = prefs.edit();
-            edit.putString(ACCESS_KEY_NAME, "oauth2:");
-            edit.putString(ACCESS_SECRET_NAME, oauth2AccessToken);
+            edit.putString(DROPBOX_ACCESS_KEY, "oauth2:");
+            edit.putString(DROPBOX_ACCESS_SECRET, oauth2AccessToken);
             edit.commit();
             return;
         }
@@ -198,8 +206,8 @@ public class DropboxFragment extends UnistorFragment{
         if (oauth1AccessToken != null) {
             SharedPreferences prefs = getActivity().getSharedPreferences(Constants.PREFS_NAME, 0);
             SharedPreferences.Editor edit = prefs.edit();
-            edit.putString(ACCESS_KEY_NAME, oauth1AccessToken.key);
-            edit.putString(ACCESS_SECRET_NAME, oauth1AccessToken.secret);
+            edit.putString(DROPBOX_ACCESS_KEY, oauth1AccessToken.key);
+            edit.putString(DROPBOX_ACCESS_SECRET, oauth1AccessToken.secret);
             edit.commit();
             return;
         }
@@ -265,9 +273,12 @@ public class DropboxFragment extends UnistorFragment{
                 }else{
                     tmp.setName(entry.fileName());
                     tmp.setEntryType(Constants.ENTRY_TYPE_FILE);
+                    tmp.setSizeString(entry.size);
+                    tmp.setLastModification(entry.modified);
                 }
                 tmp.setPath(entry.path);
                 tmp.setFolder(entry.isDir);
+
 
                 entryList.add(tmp);
             }

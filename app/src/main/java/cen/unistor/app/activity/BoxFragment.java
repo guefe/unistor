@@ -6,7 +6,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.webkit.MimeTypeMap;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.Toast;
@@ -54,7 +53,7 @@ public class BoxFragment extends UnistorFragment{
     private final String CLIENT_SECRET = "jBhlEPtO8Hat0WSczsDx9PVmetjJfMjd";
     private final String REDIRECT_URI = "http://localhost";
 
-    private final String AUTH_KEY = "AUTH_KEY";
+    private final String BOX_AUTH_KEY = "BOX_AUTH_KEY";
     private final static int AUTH_REQUEST = 1;
 
     private BoxAndroidClient mBoxClient;
@@ -210,6 +209,8 @@ public class BoxFragment extends UnistorFragment{
 
                 }else if(item.getType().equals(Constants.BOX_TYPE_FILE)){
                     entry.setEntryType(Constants.ENTRY_TYPE_FILE);
+                    entry.setSizeString(String.valueOf(item.getSize()));
+                    entry.setLastModification(item.getModifiedAt());
 
                 }else if(item.getType().equals(Constants.BOX_TYPE_WEBLINK)){
                     entry.setEntryType(Constants.ENTRY_TYPE_BOOKMARK);
@@ -307,14 +308,14 @@ public class BoxFragment extends UnistorFragment{
         try {
             IBoxJSONParser parser = getJSONParser();
             String authString = parser.convertBoxObjectToJSONString(auth);
-            mContext.getSharedPreferences(Constants.PREFS_NAME, 0).edit().putString(AUTH_KEY, authString).commit();
+            mContext.getSharedPreferences(Constants.PREFS_NAME, 0).edit().putString(BOX_AUTH_KEY, authString).commit();
         }
         catch (Exception e) {
         }
     }
 
     private BoxAndroidOAuthData loadSavedAuth() {
-        String authString = mContext.getSharedPreferences(Constants.PREFS_NAME, 0).getString(AUTH_KEY, "");
+        String authString = mContext.getSharedPreferences(Constants.PREFS_NAME, 0).getString(BOX_AUTH_KEY, "");
         if (StringUtils.isNotEmpty(authString)) {
             try {
                 IBoxJSONParser parser = getJSONParser();

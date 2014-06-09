@@ -5,25 +5,57 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
-    <ImageView
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:id="@+id/entryIcon"
-        android:layout_centerVertical="true"
-        android:layout_margin="8dp"
-        android:contentDescription="@string/desc_icon" />
+
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:id="@+id/entryName"
-        android:layout_centerVertical="true"
-        android:layout_toRightOf="@+id/entryIcon"
-        android:textColor="@android:color/black"
+        android:textColor="#ff0b3b76"
         android:paddingRight="2dp"
         android:ellipsize="middle"
-        android:singleLine="true"/>
+        android:singleLine="true"
+        android:text="Esto es una entrada"
+        android:layout_above="@+id/entrySize"
+        android:layout_toRightOf="@+id/entryIcon" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:id="@+id/entrySize"
+        android:textColor="#87000000"
+        android:paddingRight="2dp"
+        android:ellipsize="middle"
+        android:singleLine="true"
+        android:text="5 MB"
+        android:layout_marginRight="12dp"
+        android:layout_alignBottom="@+id/entryIcon"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:textStyle="italic" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="Small Text"
+        android:id="@+id/lastModification"
+        android:layout_marginRight="5dp"
+        android:layout_alignTop="@+id/entrySize"
+        android:layout_toLeftOf="@+id/entrySize"
+        android:textStyle="italic"
+        android:textColor="#87000000" />
+
+    <ImageView
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:id="@+id/entryIcon"
+        android:layout_centerVertical="true"
+        android:layout_margin="8dp"
+        android:contentDescription="@string/desc_icon"
+        android:src="@drawable/ic_launcher"/>
 
 
 </RelativeLayout>

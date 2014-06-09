@@ -6,6 +6,8 @@ import android.widget.TextView;
 public class ViewHolder{
     private TextView name;
     private ImageView icon;
+    private TextView size;
+    private TextView lastModification;
     private UnistorEntry entry;
 
     public TextView getName() {
@@ -30,5 +32,21 @@ public class ViewHolder{
 
     public void setEntry(UnistorEntry entry) {
         this.entry = entry;
+    }
+
+    public TextView getSize() {
+        return size;
+    }
+
+    public void setSize(TextView size) {
+        this.size = size;
+    }
+
+    public TextView getLastModification() {
+        return lastModification;
+    }
+
+    public void setLastModification(TextView lastModification) {
+        this.lastModification = lastModification;
     }
 }

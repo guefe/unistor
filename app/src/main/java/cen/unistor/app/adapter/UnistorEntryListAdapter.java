@@ -55,6 +55,8 @@ public class UnistorEntryListAdapter extends ArrayAdapter<UnistorEntry>{
             holder = new ViewHolder();
             holder.setIcon((ImageView)convertView.findViewById(R.id.entryIcon));
             holder.setName((TextView)convertView.findViewById(R.id.entryName));
+            holder.setSize((TextView)convertView.findViewById(R.id.entrySize));
+            holder.setLastModification((TextView)convertView.findViewById(R.id.lastModification));
 
             convertView.setTag(holder);
         }else {
@@ -65,6 +67,8 @@ public class UnistorEntryListAdapter extends ArrayAdapter<UnistorEntry>{
 
         holder.getName().setText(this.getItem(position).getName());
         holder.getIcon().setImageResource(this.getItem(position).getEntryIcon(mContext));
+        holder.getSize().setText(this.getItem(position).getSizeString());
+        holder.getLastModification().setText(this.getItem(position).getLastModification());
         holder.setEntry(this.getItem(position));
         return convertView;
     }
