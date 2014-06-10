@@ -64,7 +64,36 @@ public class BoxFragment extends UnistorFragment{
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
+
         listView = (ListView)rootView.findViewById(R.id.listView);
+
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                ViewHolder holder = (ViewHolder) view.getTag();
+                if (holder.getEntry().getName().contains(".apk")) {
+                    Toast.makeText(mContext, R.string.open_apk_error, Toast.LENGTH_LONG).show();
+                } else if (!holder.getEntry().isFolder()) {
+                    DownloadFileAsyncTask downloadTask
+                            = new DownloadFileAsyncTask(mContext, mBoxClient, holder.getEntry().getPath(),
+                            holder.getEntry().getName(), holder.getEntry().getSize());
+
+                    downloadTask.execute();
+                } else {
+                    //TODO backButton historial o parentPath?? --> parentPath implica consumoDatos
+                    ContentStatus currentStatus = new ContentStatus(
+                            new ArrayList<UnistorEntry>(currentContent),
+                            null,
+                            new String(currentPath));
+                    statusHistory.push(currentStatus);
+                    previousPath = currentPath;
+                    currentContent = loadContent(holder.getEntry().getPath());
+                    populateContentListView(currentContent);
+                }
+
+            }
+        });
+
         mContext = rootView.getContext();
         statusHistory = new Stack<ContentStatus>();
         // Initilize with the ID of the root folder.
@@ -75,56 +104,11 @@ public class BoxFragment extends UnistorFragment{
             currentPath = savedInstanceState.getString("currentPath");
         }else{
             startAuthentication();
-                currentContent = loadContent(this.currentPath);
 
         }
-
-        populateContentListView(currentContent);
         return rootView;
     }
 
-
-
-    @Override
-    public void onResume() {
-        super.onResume();
-
-        if(mBoxClient != null){
-
-
-            listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                @Override
-                public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                    ViewHolder holder = (ViewHolder) view.getTag();
-                    if (holder.getEntry().getName().contains(".apk")) {
-                        Toast.makeText(mContext, R.string.open_apk_error, Toast.LENGTH_LONG).show();
-                    } else if (!holder.getEntry().isFolder()) {
-                        DownloadFileAsyncTask downloadTask
-                                = new DownloadFileAsyncTask(mContext, mBoxClient, holder.getEntry().getPath(),
-                                    holder.getEntry().getName(), holder.getEntry().getSize());
-
-                        downloadTask.execute();
-                    } else {
-                        //TODO backButton historial o parentPath?? --> parentPath implica consumoDatos
-                        ContentStatus currentStatus = new ContentStatus(
-                                new ArrayList<UnistorEntry>(currentContent),
-                                null,
-                                new String(currentPath));
-                        statusHistory.push(currentStatus);
-                        previousPath = currentPath;
-                        currentContent = loadContent(holder.getEntry().getPath());
-                        populateContentListView(currentContent);
-                    }
-
-                }
-            });
-
-
-        }
-
-
-
-    }
 
 
 
@@ -132,6 +116,8 @@ public class BoxFragment extends UnistorFragment{
         BoxAndroidOAuthData oauth = loadSavedAuth();
         if (oauth != null){
             this.mBoxClient = this.buildBoxClient(oauth);
+            currentContent = loadContent(this.currentPath);
+            populateContentListView(currentContent);
         }else {
             Intent intent = OAuthActivity.createOAuthActivityIntent(mContext, CLIENT_ID, CLIENT_SECRET, false, REDIRECT_URI);
             this.startActivityForResult(intent, AUTH_REQUEST);

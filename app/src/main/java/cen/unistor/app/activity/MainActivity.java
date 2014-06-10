@@ -1,23 +1,23 @@
 package cen.unistor.app.activity;
 
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.StrictMode;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBarActivity;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
+import android.widget.Button;
 
-import java.util.ArrayList;
 import java.util.Locale;
+import java.util.Map;
 
 import cen.unistor.app.R;
-import cen.unistor.app.adapter.UnistorEntry;
 import cen.unistor.app.util.Constants;
 import cen.unistor.app.util.SimpleFileDialog;
 import cen.unistor.app.util.ZoomOutPageTransformer;
@@ -47,13 +47,33 @@ public class MainActivity extends ActionBarActivity {
     private int copyMoveAction = Constants.ACTION_PASTE_DONE;
 
 
-
+    private Button btnAddAccount;
+    private boolean logged = false;
 
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        SharedPreferences prefs = getSharedPreferences(Constants.PREFS_NAME, 0);
+        if(prefs != null){
+            Map valores = prefs.getAll();
+            if (!valores.isEmpty()){
+                logged = true;
+            }
+        }
+
+        if(logged) {
+            buildActiveView();
+        }else {
+            this.buildInactiveView();
+        }
+
+    
+    }
+
+    private void buildActiveView(){
         setContentView(R.layout.activity_main);
 
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
@@ -70,9 +90,23 @@ public class MainActivity extends ActionBarActivity {
         mViewPager = (ViewPager) findViewById(R.id.pager);
         mViewPager.setPageTransformer(true, new ZoomOutPageTransformer());
         mViewPager.setAdapter(mSectionsPagerAdapter);
+    }
 
+    public void buildInactiveView(){
+        setContentView(R.layout.main_activity_no_account);
 
-    
+        this.btnAddAccount = (Button)findViewById(R.id.add_account_btn);
+
+        this.btnAddAccount.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                buildActiveView();
+
+                logged = true;
+            }
+        });
+
+        invalidateOptionsMenu();
     }
 
 
@@ -82,6 +116,7 @@ public class MainActivity extends ActionBarActivity {
         
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main, menu);
+        menu.findItem(R.id.action_upload).setVisible(logged);
         return true;
     }
 
@@ -95,9 +130,16 @@ public class MainActivity extends ActionBarActivity {
         switch (item.getItemId()){
             case R.id.action_settings:
                 for (Fragment fragment : getSupportFragmentManager().getFragments()){
-                    ((UnistorFragment)fragment).logOut();
 
+                    ((UnistorFragment)fragment).logOut();
+                    FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+
+                    transaction.remove(fragment);
+                    transaction.commit();
                 }
+                logged = false;
+                this.buildInactiveView();
+
                 result = true;
                 break;
 
@@ -221,15 +263,13 @@ public class MainActivity extends ActionBarActivity {
                 case 1:
                     return new BoxFragment();
                 default:
-                    return PlaceholderFragment.newInstance(position + 1);
+                    return null;
             }
-
-
         }
 
         @Override
         public int getCount() {
-            // Show 3 total pages.
+            // Show one fragment per account
             return ACCOUNT_NUMBER;
         }
 
@@ -248,74 +288,4 @@ public class MainActivity extends ActionBarActivity {
         }
 
     }
-
-    /**
-     * A placeholder fragment containing a simple view.
-     */
-    public static class PlaceholderFragment extends UnistorFragment {
-        /**
-         * The fragment argument representing the section number for this
-         * fragment.
-         */
-        private static final String ARG_SECTION_NUMBER = "section_number";
-
-        /**
-         * Returns a new instance of this fragment for the given section
-         * number.
-         */
-        public static PlaceholderFragment newInstance(int sectionNumber) {
-            PlaceholderFragment fragment = new PlaceholderFragment();
-            Bundle args = new Bundle();
-            args.putInt(ARG_SECTION_NUMBER, sectionNumber);
-            fragment.setArguments(args);
-            return fragment;
-        }
-
-
-        @Override
-        public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                Bundle savedInstanceState) {
-            View rootView = inflater.inflate(R.layout.fragment_main, container, false);
-//            TextView textView = (TextView) rootView.findViewById(R.id.section_label);
-//            textView.setText(Integer.toString(getArguments().getInt(ARG_SECTION_NUMBER)));
-            return rootView;
-        }
-
-        @Override
-        public boolean keyBackPressed() {
-            return false;
-        }
-
-
-        @Override
-        public boolean uploadFile(String path) {
-            return false;
-        }
-
-        @Override
-        public boolean pasteFile(String source, String name, int mode) {
-            return false;
-        }
-
-
-        @Override
-        protected void deleteElement(String path) {
-
-        }
-
-        @Override
-        protected ArrayList<UnistorEntry> loadContent(String path) {
-            return null;
-        }
-
-        @Override
-        public void logOut() {
-
-        }
-    }
-
-
-
-
-
 }

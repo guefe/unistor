@@ -4,8 +4,7 @@
     <string name="app_name">Unistor</string>
     <string name="title_section1">Dropbox</string>
     <string name="title_section2">Box</string>
-    <string name="title_section3">Section 3</string>
-    <string name="action_settings">Configuración</string>
+    <string name="action_logout">Cerrar Sesión</string>
     <string name="desc_icon">icon</string>
 
     <!-- Dropbox error messages -->
@@ -37,6 +36,7 @@
         <item>Eliminar</item>
     </string-array>
 
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="add_account_btn">Añadir cuenta</string>
+    <string name="no_account_lbl">No hay cuentas abiertas</string>
 
 </resources>

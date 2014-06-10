@@ -72,6 +72,30 @@ public class DropboxFragment extends UnistorFragment{
         }
 
         loggedIn = mDBApi.getSession().isLinked();
+
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                ViewHolder holder = (ViewHolder) view.getTag();
+                if (holder.getEntry().getName().contains(".apk")) {
+                    Toast.makeText(mContext, R.string.open_apk_error, Toast.LENGTH_LONG).show();
+                } else if (!holder.getEntry().isFolder()) {
+                    DownloadFileAsyncTask downloadTask
+                            = new DownloadFileAsyncTask(mContext, mDBApi, holder.getEntry().getPath(), holder.getEntry().getName());
+                    downloadTask.execute();
+                } else {
+                    //TODO backButton historial o parentPath?? --> parentPath implica consumoDAtos
+                    ContentStatus currentStatus = new ContentStatus(
+                            new ArrayList<UnistorEntry>(currentContent),
+                            new String(currentHash),
+                            new String(currentPath));
+                    statusHistory.push(currentStatus);
+                    currentContent = loadContent(holder.getEntry().getPath());
+                    populateContentListView(currentContent);
+                }
+
+            }
+        });
     }
 
 
@@ -79,10 +103,16 @@ public class DropboxFragment extends UnistorFragment{
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
-        listView = (ListView)rootView.findViewById(R.id.listView);
+
 
         this.mContext = rootView.getContext();
+
+        listView = (ListView)rootView.findViewById(R.id.listView);
+
+
         this.init();
+
+
         if (savedInstanceState != null){
             currentContent = savedInstanceState.getParcelableArrayList("currentContent");
             currentPath = savedInstanceState.getString("currentPath");
@@ -98,29 +128,7 @@ public class DropboxFragment extends UnistorFragment{
             }
             populateContentListView(currentContent);
 
-            listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                @Override
-                public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                    ViewHolder holder = (ViewHolder) view.getTag();
-                    if (holder.getEntry().getName().contains(".apk")) {
-                        Toast.makeText(mContext, R.string.open_apk_error, Toast.LENGTH_LONG).show();
-                    } else if (!holder.getEntry().isFolder()) {
-                        DownloadFileAsyncTask downloadTask
-                                = new DownloadFileAsyncTask(mContext, mDBApi, holder.getEntry().getPath(), holder.getEntry().getName());
-                        downloadTask.execute();
-                    } else {
-                        //TODO backButton historial o parentPath?? --> parentPath implica consumoDAtos
-                        ContentStatus currentStatus = new ContentStatus(
-                                new ArrayList<UnistorEntry>(currentContent),
-                                new String(currentHash),
-                                new String(currentPath));
-                        statusHistory.push(currentStatus);
-                        currentContent = loadContent(holder.getEntry().getPath());
-                        populateContentListView(currentContent);
-                    }
 
-                }
-            });
         }
         return rootView;
     }
@@ -220,7 +228,8 @@ public class DropboxFragment extends UnistorFragment{
         // Clear our stored keys
         clearKeys();
         // Change UI state to display logged out version
-        //setLoggedIn(false);
+        loggedIn = false;
+
 
         Log.i(TAG, "logout");
     }
@@ -480,4 +489,6 @@ public class DropboxFragment extends UnistorFragment{
         getActivity().invalidateOptionsMenu();
         return result;
     }
+
+
 }
