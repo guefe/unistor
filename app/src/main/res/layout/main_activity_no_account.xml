@@ -12,7 +12,8 @@
         android:text="@string/no_account_lbl"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="198dp" />
+        android:layout_centerVertical="true"
+        android:layout_marginTop="210dp" />
 
     <Button
         android:layout_width="wrap_content"

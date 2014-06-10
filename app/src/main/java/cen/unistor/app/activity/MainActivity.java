@@ -115,8 +115,8 @@ public class MainActivity extends ActionBarActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.main, menu);
-        menu.findItem(R.id.action_upload).setVisible(logged);
+        if(logged)
+            getMenuInflater().inflate(R.menu.main, menu);
         return true;
     }
 
@@ -128,7 +128,8 @@ public class MainActivity extends ActionBarActivity {
         boolean result = true;
 
         switch (item.getItemId()){
-            case R.id.action_settings:
+            case R.id.action_logout:
+
                 for (Fragment fragment : getSupportFragmentManager().getFragments()){
 
                     ((UnistorFragment)fragment).logOut();
@@ -281,8 +282,6 @@ public class MainActivity extends ActionBarActivity {
                     return getString(R.string.title_section1).toUpperCase(l);
                 case 1:
                     return getString(R.string.title_section2).toUpperCase(l);
-                case 2:
-                    return getString(R.string.title_section3).toUpperCase(l);
             }
             return null;
         }
