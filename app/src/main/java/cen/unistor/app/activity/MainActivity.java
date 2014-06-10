@@ -20,6 +20,7 @@ import cen.unistor.app.R;
 import cen.unistor.app.adapter.UnistorEntry;
 import cen.unistor.app.util.Constants;
 import cen.unistor.app.util.SimpleFileDialog;
+import cen.unistor.app.util.ZoomOutPageTransformer;
 
 
 public class MainActivity extends ActionBarActivity {
@@ -67,6 +68,7 @@ public class MainActivity extends ActionBarActivity {
 
         // Set up the ViewPager with the sections adapter.
         mViewPager = (ViewPager) findViewById(R.id.pager);
+        mViewPager.setPageTransformer(true, new ZoomOutPageTransformer());
         mViewPager.setAdapter(mSectionsPagerAdapter);
 
 
@@ -92,6 +94,10 @@ public class MainActivity extends ActionBarActivity {
 
         switch (item.getItemId()){
             case R.id.action_settings:
+                for (Fragment fragment : getSupportFragmentManager().getFragments()){
+                    ((UnistorFragment)fragment).logOut();
+
+                }
                 result = true;
                 break;
 
@@ -135,6 +141,8 @@ public class MainActivity extends ActionBarActivity {
         UnistorFragment fragment = (UnistorFragment)getSupportFragmentManager().getFragments().get(mViewPager.getCurrentItem());
 
         fragment.uploadFile(pathToUpload);
+
+
 
     }
 
@@ -298,6 +306,11 @@ public class MainActivity extends ActionBarActivity {
         @Override
         protected ArrayList<UnistorEntry> loadContent(String path) {
             return null;
+        }
+
+        @Override
+        public void logOut() {
+
         }
     }
 

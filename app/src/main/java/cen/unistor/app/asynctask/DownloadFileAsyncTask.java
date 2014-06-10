@@ -87,7 +87,10 @@ public class DownloadFileAsyncTask extends AsyncTask<Void, Long, Boolean> {
             public void onCancel(DialogInterface dialogInterface) {
                 Log.i("Info: ", "onCancel fired");
                 cancel(true);
-                mBoxProgressListener.onCanceled();
+                if(mBoxProgressListener != null){
+                    mBoxProgressListener.onCanceled();
+                }
+
                 mErrorMsg = mContext.getString(R.string.canceled_msg);
 
             }
@@ -96,7 +99,9 @@ public class DownloadFileAsyncTask extends AsyncTask<Void, Long, Boolean> {
             public void onClick(DialogInterface dialog, int which) {
                 Log.i("Info: ", "Button fired");
                 cancel(true);
-                mBoxProgressListener.onCanceled();
+                if(mBoxProgressListener != null){
+                    mBoxProgressListener.onCanceled();
+                }
                 mErrorMsg = mContext.getString(R.string.canceled_msg);
             }
         });

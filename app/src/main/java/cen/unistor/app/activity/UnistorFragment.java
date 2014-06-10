@@ -49,6 +49,8 @@ public abstract class UnistorFragment extends Fragment implements UploadFileAsyn
 
     protected abstract ArrayList<UnistorEntry> loadContent(String path);
 
+    public abstract void logOut();
+
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
@@ -166,6 +168,8 @@ public abstract class UnistorFragment extends Fragment implements UploadFileAsyn
         currentContent = this.loadContent(currentPath);
         populateContentListView(currentContent);
     }
+
+
 
 
 }

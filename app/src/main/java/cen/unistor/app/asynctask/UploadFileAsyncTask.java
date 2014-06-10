@@ -41,7 +41,6 @@ import cen.unistor.app.R;
 public class UploadFileAsyncTask extends AsyncTask<Void, Long, Boolean> {
 
 
-
     /**
      * Interface to be implemented by the fragment to have a notice
      * when the upload has finished.
@@ -72,6 +71,7 @@ public class UploadFileAsyncTask extends AsyncTask<Void, Long, Boolean> {
     /* Box parameters */
     private BoxAndroidClient mBoxClient;
     private double mFileSize;
+    private BoxProgressListener mBoxProgressListener;
 
 
     private String mErrorMsg;
@@ -109,7 +109,12 @@ public class UploadFileAsyncTask extends AsyncTask<Void, Long, Boolean> {
             public void onCancel(DialogInterface dialogInterface) {
                 Log.i("Info: ", "onCancel fired");
                 cancel(true);
-                mUploadRequest.abort();
+                if(mBoxProgressListener != null){
+                    mBoxProgressListener.onCanceled();
+                }else {
+                    mUploadRequest.abort();
+                }
+
                 mErrorMsg = mContext.getString(R.string.canceled_msg);
             }
         });
@@ -118,7 +123,12 @@ public class UploadFileAsyncTask extends AsyncTask<Void, Long, Boolean> {
             public void onClick(DialogInterface dialog, int which) {
                 Log.i("Info: ", "Button fired");
                 cancel(true);
-                mUploadRequest.abort();
+                if(mBoxProgressListener != null){
+                    mBoxProgressListener.onCanceled();
+                }else {
+                    mUploadRequest.abort();
+                }
+
                 mErrorMsg = mContext.getString(R.string.canceled_msg);
 
             }
@@ -259,6 +269,7 @@ public class UploadFileAsyncTask extends AsyncTask<Void, Long, Boolean> {
         try {
             BoxFileUploadRequestObject uploadRequestObject
                     = BoxFileUploadRequestObject.uploadFileRequestObject(mDestPath, mFileName, mSourceFile);
+            this.mBoxProgressListener = new BoxProgressListener();
             uploadRequestObject.setListener(new BoxProgressListener());
             mBoxClient.getFilesManager().uploadFile(uploadRequestObject);
 

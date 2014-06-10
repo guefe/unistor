@@ -73,10 +73,13 @@ public class BoxFragment extends UnistorFragment{
         if (savedInstanceState != null){
             currentContent = savedInstanceState.getParcelableArrayList("currentContent");
             currentPath = savedInstanceState.getString("currentPath");
-            //statusHistory = savedInstanceState.put
+        }else{
+            startAuthentication();
+                currentContent = loadContent(this.currentPath);
+
         }
 
-        startAuthentication();
+        populateContentListView(currentContent);
         return rootView;
     }
 
@@ -116,11 +119,7 @@ public class BoxFragment extends UnistorFragment{
                 }
             });
 
-            if(currentContent == null || currentContent.isEmpty()) {
-                currentContent = loadContent(this.currentPath);
 
-            }
-            populateContentListView(currentContent);
         }
 
 
@@ -148,6 +147,8 @@ public class BoxFragment extends UnistorFragment{
                 BoxAndroidOAuthData oauth = data.getParcelableExtra(OAuthActivity.BOX_CLIENT_OAUTH);
                 this.mBoxClient = buildBoxClient(oauth);
                 saveAuth(oauth);
+                currentContent = loadContent(this.currentPath);
+                populateContentListView(currentContent);
                 break;
         }
     }
@@ -233,6 +234,11 @@ public class BoxFragment extends UnistorFragment{
         }
 
         return entryList;
+    }
+
+    @Override
+    public void logOut() {
+        Log.i(TAG, "logout");
     }
 
 

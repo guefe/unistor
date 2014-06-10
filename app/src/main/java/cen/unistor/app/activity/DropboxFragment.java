@@ -86,6 +86,7 @@ public class DropboxFragment extends UnistorFragment{
         if (savedInstanceState != null){
             currentContent = savedInstanceState.getParcelableArrayList("currentContent");
             currentPath = savedInstanceState.getString("currentPath");
+            currentHash = savedInstanceState.getString("currentHash");
             //statusHistory = savedInstanceState.put
         }
 
@@ -149,12 +150,10 @@ public class DropboxFragment extends UnistorFragment{
     }
 
     @Override
-    public void onPause() {
-        super.onPause();
-
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putString("currentHash", currentHash);
     }
-
-
 
     private AndroidAuthSession buildSession() {
         AppKeyPair appKeyPair = new AppKeyPair(APP_KEY, APP_SECRET);
@@ -214,7 +213,7 @@ public class DropboxFragment extends UnistorFragment{
     }
 
 
-    private void logOut() {
+    public void logOut() {
         // Remove credentials from the session
         mDBApi.getSession().unlink();
 
@@ -222,6 +221,8 @@ public class DropboxFragment extends UnistorFragment{
         clearKeys();
         // Change UI state to display logged out version
         //setLoggedIn(false);
+
+        Log.i(TAG, "logout");
     }
 
     private void clearKeys() {
