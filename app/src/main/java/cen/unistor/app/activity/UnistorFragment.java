@@ -143,13 +143,14 @@ public abstract class UnistorFragment extends Fragment implements UploadFileAsyn
         }
 
         // Setting the adapter with the new items.
-        // If the adapter have been previously created, we use notifyDataSetChanged,
-        // which uses pretty less resources than creating a new one.
+        // If the adapter have been previously created, we use notifyDataSetChanged to refresh,
+        // that uses fairly less resources than creating a new one.
         if(this.listView.getAdapter() == null){
             UnistorEntryListAdapter listViewAdapter = new UnistorEntryListAdapter(mContext, content);
             this.listView.setAdapter(listViewAdapter);
             // Set context menu for the listview
             registerForContextMenu(listView);
+
         }else{
             UnistorEntryListAdapter listViewAdapter = (UnistorEntryListAdapter)this.listView.getAdapter();
             listViewAdapter.clear();
@@ -161,7 +162,7 @@ public abstract class UnistorFragment extends Fragment implements UploadFileAsyn
 
 
     /**
-     * Listener to refresh data when upload finishes
+     * Callback to refresh data when upload finishes
      */
     @Override
     public void onUploadFinish() {

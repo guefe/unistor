@@ -423,8 +423,15 @@ public class DropboxFragment extends UnistorFragment{
     public boolean pasteFile(String source, String namefile, int mode) {
         boolean result = false;
         try {
-            //String namefile = source.substring(source.lastIndexOf('/'));
-            String dest = this.currentPath.concat("/"+namefile);
+
+            String dest = this.currentPath.equals("/") ?
+                            this.currentPath.concat(namefile) : this.currentPath.concat("/" + namefile);
+
+            if( source.equals(dest) ) {
+                namefile = getString(R.string.copy_prefix) + namefile;
+                dest = this.currentPath.equals("/") ?
+                        this.currentPath.concat(namefile) : this.currentPath.concat("/" + namefile);
+            }
 
             switch (mode) {
                 case Constants.ACTION_COPY:

@@ -1,5 +1,6 @@
 package cen.unistor.app.activity;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -114,6 +115,7 @@ public class BoxFragment extends UnistorFragment{
 
     public void startAuthentication(){
         BoxAndroidOAuthData oauth = loadSavedAuth();
+
         if (oauth != null){
             this.mBoxClient = this.buildBoxClient(oauth);
             currentContent = loadContent(this.currentPath);
@@ -216,10 +218,18 @@ public class BoxFragment extends UnistorFragment{
         } catch (BoxServerException e) {
             e.printStackTrace();
         } catch (AuthFatalFailureException e) {
-            e.printStackTrace();
+           Toast.makeText(mContext, R.string.box_auth_error,Toast.LENGTH_LONG).show();
+           this.refreshAuth();
+
+            Log.i(TAG, "Auth error: credentials refreshed");
         }
 
         return entryList;
+    }
+
+    private void refreshAuth() {
+        this.saveAuth(null);
+        this.startAuthentication();
     }
 
     @Override
@@ -264,6 +274,7 @@ public class BoxFragment extends UnistorFragment{
             }
 
             // Refresh the current view to reflect the changes
+
             this.currentContent = loadContent(this.currentPath);
             populateContentListView(this.currentContent);
         } catch (BoxRestException e) {
@@ -295,27 +306,45 @@ public class BoxFragment extends UnistorFragment{
         }
     }
 
-
+    /**
+     * Save credentials into sharedPreferences.
+     * If auth == null, clear previous stored credentials
+     * @param auth
+     */
     private void saveAuth(BoxAndroidOAuthData auth) {
         try {
-            IBoxJSONParser parser = getJSONParser();
-            String authString = parser.convertBoxObjectToJSONString(auth);
-            mContext.getSharedPreferences(Constants.PREFS_NAME, 0).edit().putString(BOX_AUTH_KEY, authString).commit();
+            if (auth !=null){
+                IBoxJSONParser parser = getJSONParser();
+                String authString = parser.convertBoxObjectToJSONString(auth);
+                mContext.getSharedPreferences(Constants.PREFS_NAME, 0).edit().putString(BOX_AUTH_KEY, authString).commit();
+
+            }else {
+                mContext.getSharedPreferences(Constants.PREFS_NAME, 0).edit().remove(BOX_AUTH_KEY).commit();
+            }
+
         }
         catch (Exception e) {
         }
     }
 
+
+    /**
+     *
+     * @return Auth data loaded from SharedPreferences
+     */
     private BoxAndroidOAuthData loadSavedAuth() {
         String authString = mContext.getSharedPreferences(Constants.PREFS_NAME, 0).getString(BOX_AUTH_KEY, "");
         if (StringUtils.isNotEmpty(authString)) {
             try {
                 IBoxJSONParser parser = getJSONParser();
                 BoxAndroidOAuthData auth = parser.parseIntoBoxObject(authString, BoxAndroidOAuthData.class);
+                Log.i(TAG, "loadSavedAuth: " + auth.toString());
+
                 return auth;
             }
             catch (Exception e) {
                 // failed, null will be returned. You can also add more logging, error handling here.
+                e.printStackTrace();
             }
         }
         return null;

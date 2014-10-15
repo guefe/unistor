@@ -3,7 +3,7 @@ buildscript {
 		mavenCentral()
 	}
 	dependencies {
-		classpath 'com.android.tools.build:gradle:0.11.+'
+		classpath "com.android.tools.build:gradle:0.13.0"
 	}
 }
 
@@ -27,15 +27,17 @@ configurations {
 
 dependencies {
 	archives "org.apache.maven.wagon:wagon-ssh:2.2"
-    compile 'com.android.support:appcompat-v7:+'
-	compile "com.box:box-java-sdk:3.0.9-SNAPSHOT"
+//    compile "com.android.support:appcompat-v7:19.0.0"
+//	compile "com.box:box-java-sdk:3.0.9-SNAPSHOT"
+    compile "com.android.support:support-v4:20.0.0"
+    compile "net.box:boxjavalibv2:3.1.0"
 	compile "com.fasterxml.jackson.core:jackson-annotations:2.2.2"
 	compile "com.fasterxml.jackson.core:jackson-core:2.2.2"
 	compile "com.fasterxml.jackson.core:jackson-databind:2.2.2"
 	compile "commons-codec:commons-codec:1.8"
 	compile "commons-io:commons-io:2.4"
 	compile "commons-lang:commons-lang:2.6"
-	compile "org.apache.httpcomponents:httpclient-cache:4.2.5"
+	//compile "org.apache.httpcomponents:httpclient-cache:4.2.5"
 	compile "org.apache.httpcomponents:httpcore:4.2.4"
 	compile "org.apache.httpcomponents:httpmime:4.2.5"
 }
@@ -45,7 +47,7 @@ android {
     buildToolsVersion '19.1.0'
 
 	defaultConfig {
-		minSdkVersion 8
+		minSdkVersion 11
 		targetSdkVersion 19
 		versionName project.ext.version
 		versionCode project.ext.versionCode

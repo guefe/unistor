@@ -92,6 +92,10 @@ public class MainActivity extends ActionBarActivity {
         mViewPager.setAdapter(mSectionsPagerAdapter);
     }
 
+    /**
+     *
+     * Builds the view showed when there is no active account for neither DropBox nor Box
+     */
     public void buildInactiveView(){
         setContentView(R.layout.main_activity_no_account);
 
@@ -138,10 +142,11 @@ public class MainActivity extends ActionBarActivity {
                     transaction.remove(fragment);
                     transaction.commit();
                 }
+
                 logged = false;
+
                 this.buildInactiveView();
 
-                result = true;
                 break;
 
             case R.id.action_upload:
@@ -152,6 +157,7 @@ public class MainActivity extends ActionBarActivity {
                 this.pasteFile();
                 invalidateOptionsMenu();
                 break;
+
             default:
                 result = super.onOptionsItemSelected(item);
         }

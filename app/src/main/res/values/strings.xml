@@ -16,6 +16,8 @@
     <string name="dropbox_507_insufficient_storage_msg">Espacio en cuenta insuficiente.</string>
     <string name="dropbox_404_not_found">No se encuentra el recurso.</string>
 
+    <string name="box_auth_error">Error cargando credenciales. Por favor, vuelva a inicar sesión.</string>
+
     <string name="excp_msg">Error desconocido. Pruebe de nuevo.</string>
     <string name="upload_dialog_msg">Subiendo: </string>
     <string name="download_dialog_msg">Descargando: </string>
@@ -38,5 +40,7 @@
 
     <string name="add_account_btn">Añadir cuenta</string>
     <string name="no_account_lbl">No hay cuentas abiertas</string>
+
+    <string name="copy_prefix">Copia de </string>
 
 </resources>

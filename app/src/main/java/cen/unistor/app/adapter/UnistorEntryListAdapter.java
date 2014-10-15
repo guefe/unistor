@@ -2,6 +2,7 @@ package cen.unistor.app.adapter;
 
 import android.app.Activity;
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -64,12 +65,13 @@ public class UnistorEntryListAdapter extends ArrayAdapter<UnistorEntry>{
             holder = (ViewHolder)convertView.getTag();
         }
 
-
+        Log.i("UnistorEntryListAdapter.getView", this.getItem(position).getName());
         holder.getName().setText(this.getItem(position).getName());
         holder.getIcon().setImageResource(this.getItem(position).getEntryIcon(mContext));
         holder.getSize().setText(this.getItem(position).getSizeString());
         holder.getLastModification().setText(this.getItem(position).getLastModification());
         holder.setEntry(this.getItem(position));
+
         return convertView;
     }
 
