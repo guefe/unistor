@@ -1,5 +1,11 @@
 package cen.unistor.app.activity;
 
+import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.Dialog;
+import android.app.DialogFragment;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.StrictMode;
@@ -9,21 +15,32 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBarActivity;
+import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ListAdapter;
+import android.widget.TextView;
+import android.widget.Toast;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
 import cen.unistor.app.R;
 import cen.unistor.app.util.Constants;
+import cen.unistor.app.util.ServiceSelectionDialogFragment;
 import cen.unistor.app.util.SimpleFileDialog;
 import cen.unistor.app.util.ZoomOutPageTransformer;
 
 
-public class MainActivity extends ActionBarActivity {
+
+
+public class MainActivity extends ActionBarActivity implements ServiceSelectionDialogFragment.ServiceSelectionDialogListener{
 
     private static int ACCOUNT_NUMBER = 2;
     /**
@@ -104,9 +121,12 @@ public class MainActivity extends ActionBarActivity {
         this.btnAddAccount.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                buildActiveView();
 
-                logged = true;
+                DialogFragment dialog = new ServiceSelectionDialogFragment();
+                dialog.show(getFragmentManager(), ServiceSelectionDialogFragment.TAG);
+//                buildActiveView();
+//
+//                logged = true;
             }
         });
 
@@ -293,4 +313,12 @@ public class MainActivity extends ActionBarActivity {
         }
 
     }
+
+
+    @Override
+    public void OnServiceSelected(int selection) {
+        Toast.makeText(this, "Selección: "+selection, Toast.LENGTH_LONG).show();
+    }
+
+
 }

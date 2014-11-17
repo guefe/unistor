@@ -59,7 +59,7 @@ public class UploadFileAsyncTask extends AsyncTask<Void, Long, Boolean> {
     private OnUploadFinishedListener finishListener;
     private Context mContext;
 
-    /* Path in dropbox, id in Box */
+    /* Path in dropbox_icon, id in Box */
     private String mDestPath;
     private File mSourceFile;
 

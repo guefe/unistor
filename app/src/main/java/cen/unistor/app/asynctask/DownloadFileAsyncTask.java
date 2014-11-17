@@ -226,7 +226,7 @@ public class DownloadFileAsyncTask extends AsyncTask<Void, Long, Boolean> {
             // An ouputStream is opened into the app private folder2 to store the file.
             mOutputStream = mContext.openFileOutput(this.mFileName, Context.MODE_PRIVATE);
 
-            // File is downloaded via dropbox api. MyProgressListener handles the progress
+            // File is downloaded via dropbox_icon api. MyProgressListener handles the progress
             file = mDBApi.getFile(mRemoteFilePath, null, mOutputStream, new DropboxProgressListener());
 
             Log.i("Info: ","Download Completed!");
