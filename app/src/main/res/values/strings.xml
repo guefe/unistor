@@ -42,5 +42,11 @@
     <string name="no_account_lbl">No hay cuentas abiertas</string>
 
     <string name="copy_prefix">Copia de </string>
+    <string name="action_add_account">Añadir cuenta</string>
 
+
+    <string-array name="account_options">
+        <item>Dropbox</item>
+        <item>Box</item>
+    </string-array>
 </resources>

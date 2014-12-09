@@ -1,32 +1,25 @@
 package cen.unistor.app.activity;
 
-import android.app.Activity;
-import android.app.AlertDialog;
-import android.app.Dialog;
 import android.app.DialogFragment;
-import android.content.Context;
-import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.StrictMode;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBarActivity;
-import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.ListAdapter;
-import android.widget.TextView;
 import android.widget.Toast;
 
-import java.util.Arrays;
+import java.lang.ref.WeakReference;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -96,9 +89,6 @@ public class MainActivity extends ActionBarActivity implements ServiceSelectionD
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
         StrictMode.setThreadPolicy(policy);
 
-
-
-
         // Create the adapter that will return a fragment for each of the three
         // primary sections of the activity.
         mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
@@ -122,17 +112,36 @@ public class MainActivity extends ActionBarActivity implements ServiceSelectionD
             @Override
             public void onClick(View view) {
 
-                DialogFragment dialog = new ServiceSelectionDialogFragment();
-                dialog.show(getFragmentManager(), ServiceSelectionDialogFragment.TAG);
-//                buildActiveView();
-//
-//                logged = true;
+                addAccount();
+
+
             }
         });
 
         invalidateOptionsMenu();
     }
 
+    public void addAccount(){
+        DialogFragment dialog = new ServiceSelectionDialogFragment();
+        dialog.show(getFragmentManager(), ServiceSelectionDialogFragment.TAG);
+    }
+
+
+    @Override
+    public void OnServiceSelected(int selection) {
+        Toast.makeText(this, "Selección: "+selection, Toast.LENGTH_LONG).show();
+        if(!logged) {
+            buildActiveView();
+            logged = true;
+        }
+
+        if (selection == 0){
+            //mSectionsPagerAdapter.addDropbox();
+        }else{
+            //mSectionsPagerAdapter.addBox();
+        }
+
+    }
 
 
     @Override
@@ -167,6 +176,10 @@ public class MainActivity extends ActionBarActivity implements ServiceSelectionD
 
                 this.buildInactiveView();
 
+                break;
+
+            case R.id.action_add_account:
+                addAccount();
                 break;
 
             case R.id.action_upload:
@@ -312,12 +325,6 @@ public class MainActivity extends ActionBarActivity implements ServiceSelectionD
             return null;
         }
 
-    }
-
-
-    @Override
-    public void OnServiceSelected(int selection) {
-        Toast.makeText(this, "Selección: "+selection, Toast.LENGTH_LONG).show();
     }
 
 

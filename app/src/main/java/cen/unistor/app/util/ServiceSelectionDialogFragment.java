@@ -51,9 +51,9 @@ public class ServiceSelectionDialogFragment extends DialogFragment {
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
-        String [] items = new String[] {"From Gallery", "From Camera"};
         Integer[] icons = new Integer[] {R.drawable.dropbox_icon, R.drawable.box_icon};
-        ListAdapter adapter = new ArrayAdapterWithIcon(getActivity(), items, icons);
+        ListAdapter adapter = new ArrayAdapterWithIcon(getActivity(),
+                getResources().getStringArray(R.array.account_options), icons);
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setAdapter(adapter, new DialogInterface.OnClickListener() {
             @Override

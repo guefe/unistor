@@ -34,6 +34,7 @@ import org.apache.commons.lang.StringUtils;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Stack;
+import java.util.UUID;
 
 import cen.unistor.app.R;
 import cen.unistor.app.adapter.UnistorEntry;
@@ -48,7 +49,9 @@ import cen.unistor.app.util.ContentStatus;
  */
 public class BoxFragment extends UnistorFragment{
 
-    private final String TAG = "BoxFragment";
+
+
+    private final String TAG = "BoxFragment" + UUID.randomUUID().toString();
 
     private final String CLIENT_ID = "trybv0asmi4v693ildrqpakn1642x5q5";
     private final String CLIENT_SECRET = "jBhlEPtO8Hat0WSczsDx9PVmetjJfMjd";
@@ -60,6 +63,12 @@ public class BoxFragment extends UnistorFragment{
     private BoxAndroidClient mBoxClient;
 
     private String previousPath;
+
+
+    @Override
+    public String getTitle() {
+        return "Box";
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {

@@ -24,6 +24,7 @@ import com.dropbox.client2.session.AppKeyPair;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Stack;
+import java.util.UUID;
 
 import cen.unistor.app.R;
 import cen.unistor.app.adapter.UnistorEntry;
@@ -40,7 +41,6 @@ public class DropboxFragment extends UnistorFragment{
 
 
     private final String TAG = "DropboxFragment";
-
     private static final String APP_KEY = "t820v1xgtrvep1l";
     private static final String APP_SECRET = "m1aki6lwux6phy5";
 
@@ -59,8 +59,13 @@ public class DropboxFragment extends UnistorFragment{
     private String mErrorMsg;
 
 
+    @Override
+    public String getTitle() {
+        return "Dropbox";
+    }
 
     private void init(){
+
         // Start application in the root path
         this.currentPath = "/";
         this.statusHistory = new Stack<ContentStatus>();

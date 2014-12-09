@@ -38,6 +38,7 @@ public abstract class UnistorFragment extends Fragment implements UploadFileAsyn
     protected Stack<ContentStatus> statusHistory;
 
 
+    public abstract String getTitle();
 
     public abstract boolean keyBackPressed();
 
