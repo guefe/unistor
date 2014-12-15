@@ -83,20 +83,72 @@ public class MainActivity extends ActionBarActivity implements ServiceSelectionD
     
     }
 
+    public void addAccount(){
+        //DialogFragment dialog = new ServiceSelectionDialogFragment();
+        DialogFragment dialog;
+        if (logged){
+            dialog = ServiceSelectionDialogFragment
+                    .newInstance(mSectionsPagerAdapter.getAccountStatus());
+        } else {
+            boolean[] accountStatus = {false, false};
+            dialog = ServiceSelectionDialogFragment
+                    .newInstance(accountStatus);
+        }
+
+        dialog.show(getFragmentManager(), ServiceSelectionDialogFragment.TAG);
+    }
+
+
+    @Override
+    public void OnServiceSelected(int selection) {
+//        Toast.makeText(this, "Selección: "+selection, Toast.LENGTH_LONG).show();
+
+        if(!logged) {
+            setContentView(R.layout.activity_main);
+
+            StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+            StrictMode.setThreadPolicy(policy);
+
+            // Create the adapter that will return a fragment for each of the three
+            // primary sections of the activity.
+            mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
+
+
+
+            if (selection == 0){
+                mSectionsPagerAdapter.addDropbox();
+            }else{
+                mSectionsPagerAdapter.addBox();
+            }
+
+            // Set up the ViewPager with the sections adapter.
+            mViewPager = (ViewPager) findViewById(R.id.pager);
+            mViewPager.setPageTransformer(true, new ZoomOutPageTransformer());
+            mViewPager.setAdapter(mSectionsPagerAdapter);
+
+
+            mViewPager.setCurrentItem(selection);
+            logged = true;
+
+        } else {
+            if (selection == 0){
+                mSectionsPagerAdapter.addDropbox();
+                mSectionsPagerAdapter.notifyDataSetChanged();
+                mViewPager.setCurrentItem(0);
+            }else{
+                mSectionsPagerAdapter.addBox();
+                mSectionsPagerAdapter.notifyDataSetChanged();
+                mViewPager.setCurrentItem(1);
+            }
+        }
+
+    }
+
     private void buildActiveView(){
-        setContentView(R.layout.activity_main);
 
-        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
-        StrictMode.setThreadPolicy(policy);
 
-        // Create the adapter that will return a fragment for each of the three
-        // primary sections of the activity.
-        mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
 
-        // Set up the ViewPager with the sections adapter.
-        mViewPager = (ViewPager) findViewById(R.id.pager);
-        mViewPager.setPageTransformer(true, new ZoomOutPageTransformer());
-        mViewPager.setAdapter(mSectionsPagerAdapter);
+
     }
 
     /**
@@ -121,27 +173,7 @@ public class MainActivity extends ActionBarActivity implements ServiceSelectionD
         invalidateOptionsMenu();
     }
 
-    public void addAccount(){
-        DialogFragment dialog = new ServiceSelectionDialogFragment();
-        dialog.show(getFragmentManager(), ServiceSelectionDialogFragment.TAG);
-    }
 
-
-    @Override
-    public void OnServiceSelected(int selection) {
-        Toast.makeText(this, "Selección: "+selection, Toast.LENGTH_LONG).show();
-        if(!logged) {
-            buildActiveView();
-            logged = true;
-        }
-
-        if (selection == 0){
-            //mSectionsPagerAdapter.addDropbox();
-        }else{
-            //mSectionsPagerAdapter.addBox();
-        }
-
-    }
 
 
     @Override
@@ -282,11 +314,22 @@ public class MainActivity extends ActionBarActivity implements ServiceSelectionD
         this.nameFileToCopy = nameFileToCopy;
     }
 
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        outState.putBooleanArray("accountStatus", this.mSectionsPagerAdapter.getAccountStatus());
+    }
+
     /**
      * A {@link FragmentPagerAdapter} that returns a fragment corresponding to
      * one of the sections/tabs/pages.
      */
     public class SectionsPagerAdapter extends FragmentPagerAdapter {
+        private int accountNumber = 0;
+        private boolean dropboxVisible = false;
+        private boolean boxVisible = false;
 
         public SectionsPagerAdapter(FragmentManager fm) {
             super(fm);
@@ -297,34 +340,55 @@ public class MainActivity extends ActionBarActivity implements ServiceSelectionD
             // getItem is called to instantiate the fragment for the given page.
             // Return a PlaceholderFragment (defined as a static inner class below).
 
-            switch (position){
-                case 0:
-                    return new DropboxFragment();
-                case 1:
-                    return new BoxFragment();
-                default:
-                    return null;
+            if (position == 0 && dropboxVisible){
+                return new DropboxFragment();
+
+            } else if (position == 1 && boxVisible){
+                return new BoxFragment();
+
+            } else {
+                return null;
             }
+
         }
 
         @Override
         public int getCount() {
             // Show one fragment per account
-            return ACCOUNT_NUMBER;
+            return this.accountNumber;
         }
 
         @Override
         public CharSequence getPageTitle(int position) {
             Locale l = Locale.getDefault();
-            switch (position) {
-                case 0:
-                    return getString(R.string.title_section1).toUpperCase(l);
-                case 1:
-                    return getString(R.string.title_section2).toUpperCase(l);
+
+            if (position == 0){
+                return getString(R.string.title_section1).toUpperCase(l);
+
+            } else if (position == 1){
+                return getString(R.string.title_section2).toUpperCase(l);
+
+            } else {
+                return null;
             }
-            return null;
+
         }
 
+        public void addDropbox() {
+            this.dropboxVisible = true;
+            this.accountNumber++;
+        }
+
+        public void addBox() {
+            this.boxVisible = true;
+            this.accountNumber++;
+        }
+
+
+        public boolean[] getAccountStatus(){
+            boolean[] result = {dropboxVisible, boxVisible};
+            return result;
+        }
     }
 
 

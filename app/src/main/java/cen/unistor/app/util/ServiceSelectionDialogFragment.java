@@ -27,12 +27,33 @@ import cen.unistor.app.R;
 public class ServiceSelectionDialogFragment extends DialogFragment {
 
     public static String TAG = "ServiceSelection";
+    private boolean[] status;
 
     public interface ServiceSelectionDialogListener {
         public void OnServiceSelected(int selection);
     }
 
     private ServiceSelectionDialogListener mListener;
+
+    public static ServiceSelectionDialogFragment newInstance(boolean[] accountStatus){
+        ServiceSelectionDialogFragment f = new ServiceSelectionDialogFragment();
+
+        // Supply num input as an argument.
+        Bundle args = new Bundle();
+        args.putBooleanArray("accountStatus",accountStatus);
+        f.setArguments(args);
+
+        return f;
+
+    }
+
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        this.status = getArguments().getBooleanArray("accountStatus");
+    }
 
     @Override
     public void onAttach(Activity activity) {
@@ -89,6 +110,10 @@ public class ServiceSelectionDialogFragment extends DialogFragment {
             textView.setText(getItem(position));
             ImageView image = (ImageView) convertView.findViewById(R.id.service_icon);
             image.setImageDrawable(getResources().getDrawable(images.get(position)));
+            if ( status[position] ) {
+                convertView.setClickable(false);
+                convertView.setEnabled(false);
+            }
             return convertView;
         }
 
