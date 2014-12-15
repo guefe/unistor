@@ -1,39 +1,31 @@
 package cen.unistor.app.activity;
 
-import android.app.DialogFragment;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.StrictMode;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.Toast;
 
-import java.lang.ref.WeakReference;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
 import cen.unistor.app.R;
 import cen.unistor.app.util.Constants;
-import cen.unistor.app.util.ServiceSelectionDialogFragment;
 import cen.unistor.app.util.SimpleFileDialog;
 import cen.unistor.app.util.ZoomOutPageTransformer;
 
 
 
 
-public class MainActivity extends ActionBarActivity implements ServiceSelectionDialogFragment.ServiceSelectionDialogListener{
+public class MainActivity extends ActionBarActivity{
 
     private static int ACCOUNT_NUMBER = 2;
     /**
@@ -112,36 +104,15 @@ public class MainActivity extends ActionBarActivity implements ServiceSelectionD
             @Override
             public void onClick(View view) {
 
-                addAccount();
+                buildActiveView();
 
-
+                logged = true;
             }
         });
 
         invalidateOptionsMenu();
     }
 
-    public void addAccount(){
-        DialogFragment dialog = new ServiceSelectionDialogFragment();
-        dialog.show(getFragmentManager(), ServiceSelectionDialogFragment.TAG);
-    }
-
-
-    @Override
-    public void OnServiceSelected(int selection) {
-        Toast.makeText(this, "Selección: "+selection, Toast.LENGTH_LONG).show();
-        if(!logged) {
-            buildActiveView();
-            logged = true;
-        }
-
-        if (selection == 0){
-            //mSectionsPagerAdapter.addDropbox();
-        }else{
-            //mSectionsPagerAdapter.addBox();
-        }
-
-    }
 
 
     @Override
@@ -176,10 +147,6 @@ public class MainActivity extends ActionBarActivity implements ServiceSelectionD
 
                 this.buildInactiveView();
 
-                break;
-
-            case R.id.action_add_account:
-                addAccount();
                 break;
 
             case R.id.action_upload:
