@@ -75,7 +75,7 @@ public class MainActivity extends ActionBarActivity implements ServiceSelectionD
         }
 
         if(logged) {
-            buildActiveView();
+            buildActiveView(prefs);
         }else {
             this.buildInactiveView();
         }
@@ -144,11 +144,29 @@ public class MainActivity extends ActionBarActivity implements ServiceSelectionD
 
     }
 
-    private void buildActiveView(){
+    /**
+     * Builds the activity layout in case there are previous sessions started
+     * @param prefs
+     */
+    private void buildActiveView(SharedPreferences prefs){
+        setContentView(R.layout.activity_main);
 
+        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+        StrictMode.setThreadPolicy(policy);
 
+        // Retrieve data saved in preferences for each service in order to establish the correct status.
+        boolean[] mAccountStatus = new boolean[2];
+        mAccountStatus[0] = prefs.getString(DropboxFragment.DROPBOX_ACCESS_KEY, null) != null;
+        mAccountStatus[1] = prefs.getString(BoxFragment.BOX_AUTH_KEY, null) != null;
 
+        // Create the adapter that will return a fragment for each
+        // primary sections of the activity.
+        mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager(), mAccountStatus);
 
+        // Set up the ViewPager with the sections adapter.
+        mViewPager = (ViewPager) findViewById(R.id.pager);
+        mViewPager.setPageTransformer(true, new ZoomOutPageTransformer());
+        mViewPager.setAdapter(mSectionsPagerAdapter);
     }
 
     /**
@@ -335,6 +353,22 @@ public class MainActivity extends ActionBarActivity implements ServiceSelectionD
             super(fm);
         }
 
+        public SectionsPagerAdapter(FragmentManager fm, boolean[] accountStatus){
+            super(fm);
+
+            if (accountStatus != null){
+                if (accountStatus[0]){
+                    dropboxVisible = true;
+                    accountNumber++;
+                }
+
+                if (accountStatus[1]){
+                    boxVisible = true;
+                    accountNumber++;
+                }
+            }
+        }
+
         @Override
         public Fragment getItem(int position) {
             // getItem is called to instantiate the fragment for the given page.
@@ -389,6 +423,7 @@ public class MainActivity extends ActionBarActivity implements ServiceSelectionD
             boolean[] result = {dropboxVisible, boxVisible};
             return result;
         }
+
     }
 
 

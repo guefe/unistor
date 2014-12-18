@@ -45,8 +45,8 @@ public class DropboxFragment extends UnistorFragment{
     private static final String APP_SECRET = "m1aki6lwux6phy5";
 
 
-    private static final String DROPBOX_ACCESS_KEY = "DROPBOX_ACCESS_KEY";
-    private static final String DROPBOX_ACCESS_SECRET = "DROPBOX_ACCESS_SECRET";
+    static final String DROPBOX_ACCESS_KEY = "DROPBOX_ACCESS_KEY";
+    static final String DROPBOX_ACCESS_SECRET = "DROPBOX_ACCESS_SECRET";
 
     private DropboxAPI<AndroidAuthSession> mDBApi;
 

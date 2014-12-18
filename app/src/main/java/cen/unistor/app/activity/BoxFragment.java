@@ -57,7 +57,7 @@ public class BoxFragment extends UnistorFragment{
     private final String CLIENT_SECRET = "jBhlEPtO8Hat0WSczsDx9PVmetjJfMjd";
     private final String REDIRECT_URI = "http://localhost";
 
-    private final String BOX_AUTH_KEY = "BOX_AUTH_KEY";
+    static final String BOX_AUTH_KEY = "BOX_AUTH_KEY";
     private final static int AUTH_REQUEST = 1;
 
     private BoxAndroidClient mBoxClient;
