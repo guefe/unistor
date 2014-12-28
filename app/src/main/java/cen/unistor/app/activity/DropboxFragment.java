@@ -41,8 +41,8 @@ public class DropboxFragment extends UnistorFragment{
 
 
     private final String TAG = "DropboxFragment";
-    private static final String APP_KEY = "t820v1xgtrvep1l";
-    private static final String APP_SECRET = "m1aki6lwux6phy5";
+    private final String APP_KEY = "t820v1xgtrvep1l";
+    private final String APP_SECRET = "m1aki6lwux6phy5";
 
 
     private static final String DROPBOX_ACCESS_KEY = "DROPBOX_ACCESS_KEY";
@@ -225,7 +225,7 @@ public class DropboxFragment extends UnistorFragment{
         }
     }
 
-
+    @Override
     public void logOut() {
         // Remove credentials from the session
         mDBApi.getSession().unlink();

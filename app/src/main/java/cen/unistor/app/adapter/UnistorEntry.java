@@ -154,7 +154,7 @@ public class UnistorEntry implements Parcelable {
 
 
     @Override
-     public int describeContents() {
+    public int describeContents() {
         return 0;
     }
 

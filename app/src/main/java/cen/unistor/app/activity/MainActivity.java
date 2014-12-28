@@ -36,12 +36,12 @@ public class MainActivity extends ActionBarActivity{
      * may be best to switch to a
      * {@link android.support.v4.app.FragmentStatePagerAdapter}.
      */
-    SectionsPagerAdapter mSectionsPagerAdapter;
+    private SectionsPagerAdapter mSectionsPagerAdapter;
 
     /**
      * The {@link ViewPager} that will host the section contents.
      */
-    ViewPager mViewPager;
+    private ViewPager mViewPager;
 
     private String nameFileToCopy;
     private String pathToCopyMove;
@@ -181,7 +181,7 @@ public class MainActivity extends ActionBarActivity{
                     }
                 });
 
-        fileOpenDialog.chooseFile_or_Dir();
+        fileOpenDialog.chooseFileOrDir();
 
     }
 

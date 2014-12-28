@@ -122,7 +122,7 @@ public class BoxFragment extends UnistorFragment{
 
 
 
-    public void startAuthentication(){
+    private void startAuthentication(){
         BoxAndroidOAuthData oauth = loadSavedAuth();
 
         if (oauth != null){
@@ -359,11 +359,11 @@ public class BoxFragment extends UnistorFragment{
         return null;
     }
 
-    public IBoxJSONParser getJSONParser() {
+    private IBoxJSONParser getJSONParser() {
         return new BoxJSONParser(getResourceHub());
     }
 
-    public IBoxResourceHub getResourceHub() {
+    private IBoxResourceHub getResourceHub() {
         return new AndroidBoxResourceHub();
     }
 }
