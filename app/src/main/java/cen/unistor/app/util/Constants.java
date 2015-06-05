@@ -20,6 +20,9 @@ public final class Constants {
     public static final int ACTION_MOVE = 1;
     public static final int ACTION_PASTE_DONE = -1;
 
+    public static final int ACCOUNT_DROPBOX = 0;
+    public static final int ACCOUNT_BOX = 1;
+
 
 
 

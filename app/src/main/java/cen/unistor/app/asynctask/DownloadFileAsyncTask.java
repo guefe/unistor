@@ -308,7 +308,7 @@ public class DownloadFileAsyncTask extends AsyncTask<Void, Long, Boolean> {
         //Publishes downloaded bytes of the file
         @Override
         public void onProgress(long downloadedBytes, long totalBytes) {
-            Log.i(TAG+". Progress:", ""+downloadedBytes);
+            Log.i("Progress:", ""+downloadedBytes);
             publishProgress(downloadedBytes, totalBytes);
         }
 

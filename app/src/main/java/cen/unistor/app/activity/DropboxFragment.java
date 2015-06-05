@@ -1,11 +1,14 @@
 package cen.unistor.app.activity;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.MimeTypeMap;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.Toast;
@@ -79,17 +82,46 @@ public class DropboxFragment extends UnistorFragment{
         loggedIn = mDBApi.getSession().isLinked();
 
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            /**
+             * Controla las acciones al pulsar en un elemento de la lista.
+             * En las carpetas, vuelve a pedir contenido
+             * En los ficheros:
+             *      • Excluye apk para no abrirlos.
+             *      • Si es archivo, intentará abrirlo si ya ha sido descargado.
+             *      • Si no ha sido descargado, lo descargará e intentará abrirlo.
+             *      • Si ninguna premisa se cumple, es la entrada de subir directorio.
+             *          Se carga el contenido anterior, almacenado en memoria.
+             */
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+
                 ViewHolder holder = (ViewHolder) view.getTag();
+
+
                 if (holder.getEntry().getName().contains(".apk")) {
                     Toast.makeText(mContext, R.string.open_apk_error, Toast.LENGTH_LONG).show();
+
                 } else if (!holder.getEntry().isFolder()) {
-                    DownloadFileAsyncTask downloadTask
-                            = new DownloadFileAsyncTask(mContext, mDBApi, holder.getEntry().getPath(), holder.getEntry().getName());
-                    downloadTask.execute();
-                } else {
-                    //TODO backButton historial o parentPath?? --> parentPath implica consumoDAtos
+                    File localFile = new File(mContext.getFilesDir(), holder.getEntry().getName());
+                    if (localFile.exists()) {
+                        String extension = holder.getEntry().getName().substring(holder.getEntry().getName().lastIndexOf('.') + 1).toLowerCase();
+                        String mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
+                        Intent intent = new Intent(Intent.ACTION_VIEW);
+
+                        String path = Uri.fromFile(localFile).getPath();
+                        Uri fileURI = Uri.parse("content://cen.unistor.app" + path);
+                        Log.i("File uri: ", fileURI.getPath());
+                        intent.setDataAndType(fileURI, mimeType);
+                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        mContext.startActivity(intent);
+                    } else {
+                        DownloadFileAsyncTask downloadTask
+                                = new DownloadFileAsyncTask(mContext, mDBApi, holder.getEntry().getPath(), holder.getEntry().getName());
+                        downloadTask.execute();
+                    }
+
+                }else {
+
                     ContentStatus currentStatus = new ContentStatus(
                             new ArrayList<UnistorEntry>(currentContent),
                             new String(currentHash),
@@ -430,7 +462,7 @@ public class DropboxFragment extends UnistorFragment{
         try {
 
             String dest = this.currentPath.equals("/") ?
-                            this.currentPath.concat(namefile) : this.currentPath.concat("/" + namefile);
+                    this.currentPath.concat(namefile) : this.currentPath.concat("/" + namefile);
 
             if( source.equals(dest) ) {
                 namefile = getString(R.string.copy_prefix) + namefile;

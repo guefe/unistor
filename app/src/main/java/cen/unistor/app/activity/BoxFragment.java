@@ -2,11 +2,13 @@ package cen.unistor.app.activity;
 
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.MimeTypeMap;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.Toast;
@@ -77,20 +79,51 @@ public class BoxFragment extends UnistorFragment{
 
         listView = (ListView)rootView.findViewById(R.id.listView);
 
+
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+
+            /**
+             * Controla las acciones al pulsar en un elemento de la lista.
+             * En las carpetas, vuelve a pedir contenido
+             * En los ficheros:
+             *      • Excluye apk para no abrirlos.
+             *      • Si es archivo, intentará abrirlo si ya ha sido descargado.
+             *      • Si no ha sido descargado, lo descargará e intentará abrirlo.
+             *      • Si ninguna premisa se cumple, es la entrada de subir directorio.
+             *          Se carga el contenido anterior, almacenado en memoria.
+             */
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 ViewHolder holder = (ViewHolder) view.getTag();
+
                 if (holder.getEntry().getName().contains(".apk")) {
                     Toast.makeText(mContext, R.string.open_apk_error, Toast.LENGTH_LONG).show();
-                } else if (!holder.getEntry().isFolder()) {
-                    DownloadFileAsyncTask downloadTask
-                            = new DownloadFileAsyncTask(mContext, mBoxClient, holder.getEntry().getPath(),
-                            holder.getEntry().getName(), holder.getEntry().getSize());
 
-                    downloadTask.execute();
+                } else if (!holder.getEntry().isFolder()) {
+
+                    File localFile = new File(mContext.getFilesDir(), holder.getEntry().getName());
+                    if (localFile.exists()) {
+                        String extension = holder.getEntry().getName().substring(holder.getEntry().getName().lastIndexOf('.') + 1).toLowerCase();
+                        String mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
+                        
+                        String path = Uri.fromFile(localFile).getPath();
+                        Uri fileURI = Uri.parse("content://cen.unistor.app" + path);
+                        Log.i("File uri: ", fileURI.getPath());
+                        Intent intent = new Intent(Intent.ACTION_VIEW);
+                        intent.setDataAndType(fileURI, mimeType);
+                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        mContext.startActivity(intent);
+
+                    }else {
+                        DownloadFileAsyncTask downloadTask
+                                = new DownloadFileAsyncTask(mContext, mBoxClient, holder.getEntry().getPath(),
+                                holder.getEntry().getName(), holder.getEntry().getSize());
+
+                        downloadTask.execute();
+                    }
+
                 } else {
-                    //TODO backButton historial o parentPath?? --> parentPath implica consumoDatos
+
                     ContentStatus currentStatus = new ContentStatus(
                             new ArrayList<UnistorEntry>(currentContent),
                             null,
@@ -227,8 +260,8 @@ public class BoxFragment extends UnistorFragment{
         } catch (BoxServerException e) {
             e.printStackTrace();
         } catch (AuthFatalFailureException e) {
-           Toast.makeText(mContext, R.string.box_auth_error,Toast.LENGTH_LONG).show();
-           this.refreshAuth();
+            Toast.makeText(mContext, R.string.box_auth_error,Toast.LENGTH_LONG).show();
+            this.refreshAuth();
 
             Log.i(TAG, "Auth error: credentials refreshed");
         }
