@@ -20,6 +20,9 @@ Storing files
 File picker
     http://www.scorchworks.com/Blog/simple-file-dialog-for-android-applications/
 
+ZoomOutPageTransformer
+    http://developer.android.com/training/animation/screen-slide.html#zoom-out
+
 
 GDrive get started:
     https://developer.android.com/google/auth/api-client.html
