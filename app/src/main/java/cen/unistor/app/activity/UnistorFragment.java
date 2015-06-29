@@ -38,7 +38,7 @@ public abstract class UnistorFragment extends Fragment implements UploadFileAsyn
     protected Stack<ContentStatus> statusHistory;
 
 
-    public abstract String getTitle();
+    public abstract int getServiceType();
 
     public abstract boolean keyBackPressed();
 
@@ -51,6 +51,9 @@ public abstract class UnistorFragment extends Fragment implements UploadFileAsyn
     protected abstract ArrayList<UnistorEntry> loadContent(String path);
 
     public abstract void logOut();
+
+    protected abstract void prepareChildOptionsMenu (Menu menu);
+
 
     @Override
     public void onAttach(Activity activity) {
@@ -74,7 +77,10 @@ public abstract class UnistorFragment extends Fragment implements UploadFileAsyn
             menu.findItem(R.id.action_paste).setVisible(false);
         }
 
+        prepareChildOptionsMenu(menu);
+
     }
+
 
     @Override
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
@@ -101,18 +107,25 @@ public abstract class UnistorFragment extends Fragment implements UploadFileAsyn
 
             switch (item.getItemId()){
                 case 0:// Copy
+                    //Se guarda el nombre del fichero, el path origen a copiar y el servicio origen.
                     ((MainActivity)getActivity()).setPathToCopy(itemViewHolder.getEntry().getPath());
                     ((MainActivity)getActivity()).setNameFileToCopy(itemViewHolder.getEntry().getName());
+                    ((MainActivity)getActivity()).setCopyMoveOrigin(getServiceType());
                     getActivity().invalidateOptionsMenu();
                     break;
+
                 case 1:// Move
+                    //Se guarda el nombre del fichero, el path origen a mover y el servicio origen.
                     ((MainActivity)getActivity()).setPathToMove(itemViewHolder.getEntry().getPath());
                     ((MainActivity)getActivity()).setNameFileToCopy(itemViewHolder.getEntry().getName());
+                    ((MainActivity)getActivity()).setCopyMoveOrigin(getServiceType());
                     getActivity().invalidateOptionsMenu();
                     break;
+
                 case 2:// Delete
                     deleteElement(itemViewHolder.getEntry().getPath());
-                    currentContent = loadContent(currentPath);
+                    currentContent.remove(itemViewHolder.getEntry());
+                    //currentContent = loadContent(currentPath);
                     populateContentListView(currentContent);
                     break;
             }

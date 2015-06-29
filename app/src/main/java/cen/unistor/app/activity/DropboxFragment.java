@@ -6,6 +6,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.MimeTypeMap;
@@ -58,13 +59,12 @@ public class DropboxFragment extends UnistorFragment{
     private String currentHash;
 
 
-    //TODO mErrorMsg is useful?
     private String mErrorMsg;
 
 
     @Override
-    public String getTitle() {
-        return "Dropbox";
+    public int getServiceType() {
+        return Constants.ACCOUNT_DROPBOX;
     }
 
     private void init(){
@@ -276,6 +276,13 @@ public class DropboxFragment extends UnistorFragment{
         SharedPreferences.Editor edit = prefs.edit();
         edit.clear();
         edit.commit();
+    }
+
+    @Override
+    protected void prepareChildOptionsMenu(Menu menu) {
+        if (((MainActivity)getActivity()).getCopyMoveOrigin() != Constants.ACCOUNT_DROPBOX){
+            menu.findItem(R.id.action_paste).setVisible(false);
+        }
     }
 
     /**

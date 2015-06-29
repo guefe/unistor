@@ -47,7 +47,7 @@ public class MainActivity extends ActionBarActivity{
     private String pathToCopyMove;
     // Initialize action to the default value, used when there is no action to do.
     private int copyMoveAction = Constants.ACTION_PASTE_DONE;
-
+    private int copyMoveOrigin = Constants.ACCOUNT_DROPBOX;
 
     private Button btnAddAccount;
     private boolean logged = false;
@@ -249,6 +249,14 @@ public class MainActivity extends ActionBarActivity{
         this.nameFileToCopy = nameFileToCopy;
     }
 
+    public void setCopyMoveOrigin(int copyMoveOrigin) {
+        this.copyMoveOrigin = copyMoveOrigin;
+    }
+
+    public int getCopyMoveOrigin() {
+        return copyMoveOrigin;
+    }
+
     /**
      * A {@link FragmentPagerAdapter} that returns a fragment corresponding to
      * one of the sections/tabs/pages.
@@ -266,8 +274,10 @@ public class MainActivity extends ActionBarActivity{
 
             switch (position){
                 case 0:
+                    invalidateOptionsMenu();
                     return new DropboxFragment();
                 case 1:
+                    invalidateOptionsMenu();
                     return new BoxFragment();
                 default:
                     return null;

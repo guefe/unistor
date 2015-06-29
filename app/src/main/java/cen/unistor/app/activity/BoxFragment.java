@@ -6,6 +6,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.MimeTypeMap;
@@ -68,8 +69,8 @@ public class BoxFragment extends UnistorFragment{
 
 
     @Override
-    public String getTitle() {
-        return "Box";
+    public int getServiceType() {
+        return Constants.ACCOUNT_BOX;
     }
 
     @Override
@@ -279,6 +280,13 @@ public class BoxFragment extends UnistorFragment{
         Log.i(TAG, "logout");
     }
 
+    @Override
+    protected void prepareChildOptionsMenu(Menu menu) {
+
+        if (((MainActivity)getActivity()).getCopyMoveOrigin() != Constants.ACCOUNT_BOX){
+            menu.findItem(R.id.action_paste).setVisible(false);
+        }
+    }
 
     @Override
     public boolean keyBackPressed(){
