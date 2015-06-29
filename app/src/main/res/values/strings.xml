@@ -43,6 +43,7 @@
 
     <string name="copy_prefix">Copia de </string>
     <string name="action_add_account">Añadir cuenta</string>
+    <string name="no_application_found">No se encuentra ninguna aplicación adecuada para abrir este archivo</string>
 
 
     <string-array name="account_options">

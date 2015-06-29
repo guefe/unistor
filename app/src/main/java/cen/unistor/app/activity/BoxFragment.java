@@ -98,7 +98,7 @@ public class BoxFragment extends UnistorFragment{
                 ViewHolder holder = (ViewHolder) view.getTag();
 
                 if (holder.getEntry().getName().contains(".apk")) {
-                    Toast.makeText(mContext, R.string.open_apk_error, Toast.LENGTH_LONG).show();
+                    Toast.makeText(mContext, mContext.getText(R.string.no_application_found), Toast.LENGTH_LONG).show();
 
                 } else if (!holder.getEntry().isFolder()) {
 
@@ -106,7 +106,7 @@ public class BoxFragment extends UnistorFragment{
                     if (localFile.exists()) {
                         String extension = holder.getEntry().getName().substring(holder.getEntry().getName().lastIndexOf('.') + 1).toLowerCase();
                         String mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
-                        
+
                         String path = Uri.fromFile(localFile).getPath();
                         Uri fileURI = Uri.parse("content://cen.unistor.app" + path);
                         Log.i("File uri: ", fileURI.getPath());

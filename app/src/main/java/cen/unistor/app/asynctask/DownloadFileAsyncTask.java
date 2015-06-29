@@ -2,6 +2,7 @@ package cen.unistor.app.asynctask;
 
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -140,8 +141,18 @@ public class DownloadFileAsyncTask extends AsyncTask<Void, Long, Boolean> {
                 Log.i("Info: ", "If 3");
                 return false;
             }
-            mContext.startActivity(intent);
-            return true;
+
+            try{
+                mContext.startActivity(intent);
+                return true;
+
+            }catch (ActivityNotFoundException e){
+                e.printStackTrace();
+                Toast.makeText(mContext, mContext.getString(R.string.no_application_found), Toast.LENGTH_LONG).show();
+                return false;
+            }
+
+
 
         }else{
             return false;
@@ -160,6 +171,7 @@ public class DownloadFileAsyncTask extends AsyncTask<Void, Long, Boolean> {
 
     @Override
     protected void onPostExecute(Boolean result) {
+        Log.i(this.getClass().getCanonicalName(), ": onPostExecute");
         mProgressDialog.dismiss();
 
         if(result){

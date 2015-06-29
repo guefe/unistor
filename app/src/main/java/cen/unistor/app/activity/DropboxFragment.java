@@ -99,7 +99,7 @@ public class DropboxFragment extends UnistorFragment{
 
 
                 if (holder.getEntry().getName().contains(".apk")) {
-                    Toast.makeText(mContext, R.string.open_apk_error, Toast.LENGTH_LONG).show();
+                    Toast.makeText(mContext, mContext.getText(R.string.no_application_found), Toast.LENGTH_LONG).show();
 
                 } else if (!holder.getEntry().isFolder()) {
                     File localFile = new File(mContext.getFilesDir(), holder.getEntry().getName());
