@@ -2,8 +2,8 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/BoxAndroidLibraryV2/BoxAndroidLibraryV2.iml" filepath="$PROJECT_DIR$/BoxAndroidLibraryV2/BoxAndroidLibraryV2.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/box-content-sdk/box-content-sdk.iml" filepath="$PROJECT_DIR$/box-content-sdk/box-content-sdk.iml" />
       <module fileurl="file://$PROJECT_DIR$/unistor.iml" filepath="$PROJECT_DIR$/unistor.iml" />
     </modules>
   </component>

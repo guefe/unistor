@@ -14,6 +14,11 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.box.androidsdk.content.BoxApiFile;
+import com.box.androidsdk.content.BoxApiFolder;
+import com.box.androidsdk.content.BoxFutureTask;
+import com.box.androidsdk.content.auth.BoxAuthentication;
+import com.box.androidsdk.content.models.BoxSession;
 import com.box.boxandroidlibv2.BoxAndroidClient;
 import com.box.boxandroidlibv2.activities.OAuthActivity;
 import com.box.boxandroidlibv2.dao.BoxAndroidOAuthData;
@@ -32,7 +37,7 @@ import com.box.boxjavalibv2.requests.requestobjects.BoxItemCopyRequestObject;
 import com.box.boxjavalibv2.requests.requestobjects.BoxPagingRequestObject;
 import com.box.restclientv2.exceptions.BoxRestException;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -50,7 +55,7 @@ import cen.unistor.app.util.ContentStatus;
 /**
  * Created by carlos on 5/06/14.
  */
-public class BoxFragment extends UnistorFragment{
+public class BoxFragment extends UnistorFragment implements BoxAuthentication.AuthListener{
 
 
 
@@ -63,7 +68,10 @@ public class BoxFragment extends UnistorFragment{
     private final String BOX_AUTH_KEY = "BOX_AUTH_KEY";
     private final static int AUTH_REQUEST = 1;
 
-    private BoxAndroidClient mBoxClient;
+    //private BoxAndroidClient mBoxClient;
+    private BoxSession mBoxSession;
+    private BoxApiFolder mBoxFolderApi;
+    private BoxApiFile mBoxFileApi;
 
     private String previousPath;
 
@@ -79,7 +87,6 @@ public class BoxFragment extends UnistorFragment{
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
 
         listView = (ListView)rootView.findViewById(R.id.listView);
-
 
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
@@ -157,16 +164,21 @@ public class BoxFragment extends UnistorFragment{
 
 
     private void startAuthentication(){
-        BoxAndroidOAuthData oauth = loadSavedAuth();
+//        BoxAndroidOAuthData oauth = loadSavedAuth();
+//
+//        if (oauth != null){
+//            this.mBoxClient = this.buildBoxClient(oauth);
+//            currentContent = loadContent(this.currentPath);
+//            populateContentListView(currentContent);
+//        }else {
+//            Intent intent = OAuthActivity.createOAuthActivityIntent(mContext, CLIENT_ID, CLIENT_SECRET, false, REDIRECT_URI);
+//            this.startActivityForResult(intent, AUTH_REQUEST);
+//        }
 
-        if (oauth != null){
-            this.mBoxClient = this.buildBoxClient(oauth);
-            currentContent = loadContent(this.currentPath);
-            populateContentListView(currentContent);
-        }else {
-            Intent intent = OAuthActivity.createOAuthActivityIntent(mContext, CLIENT_ID, CLIENT_SECRET, false, REDIRECT_URI);
-            this.startActivityForResult(intent, AUTH_REQUEST);
-        }
+        BoxSession mBoxSession = new BoxSession(mContext);
+        mBoxSession.setSessionAuthListener(this);
+        //BoxFutureTask<BoxSession> authTask = mBoxSession.authenticate();
+
     }
 
     @Override
@@ -375,6 +387,11 @@ public class BoxFragment extends UnistorFragment{
         }
         catch (Exception e) {
         }
+
+        BoxAuthentication.getInstance().setAuthStorage(new BoxAuthentication.AuthStorage(){
+
+
+        });
     }
 
 
@@ -406,5 +423,29 @@ public class BoxFragment extends UnistorFragment{
 
     private IBoxResourceHub getResourceHub() {
         return new AndroidBoxResourceHub();
+    }
+
+    @Override
+    public void onRefreshed(BoxAuthentication.BoxAuthenticationInfo info) {
+
+    }
+
+    @Override
+    public void onAuthCreated(BoxAuthentication.BoxAuthenticationInfo info) {
+        mBoxFolderApi = new BoxApiFolder(mBoxSession);
+        mBoxFileApi = new BoxApiFile(mBoxSession);
+        currentContent = loadContent(this.currentPath);
+        populateContentListView(currentContent);
+
+    }
+
+    @Override
+    public void onAuthFailure(BoxAuthentication.BoxAuthenticationInfo info, Exception ex) {
+
+    }
+
+    @Override
+    public void onLoggedOut(BoxAuthentication.BoxAuthenticationInfo info, Exception ex) {
+
     }
 }

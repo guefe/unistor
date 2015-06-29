@@ -1,1 +1,1 @@
-include ':app', ':BoxAndroidLibraryV2'
+include ':app', ':box-content-sdk'
