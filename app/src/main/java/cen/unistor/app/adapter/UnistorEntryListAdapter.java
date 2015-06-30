@@ -67,7 +67,7 @@ public class UnistorEntryListAdapter extends ArrayAdapter<UnistorEntry>{
             holder = (ViewHolder)convertView.getTag();
         }
 
-        Log.i("UnistorEntryListAdapter.getView", this.getItem(position).getName());
+        Log.i("GetView", this.getItem(position).getName());
         holder.getName().setText(this.getItem(position).getName());
         holder.getIcon().setImageResource(this.getItem(position).getEntryIcon(mContext));
         holder.getSize().setText(this.getItem(position).getSizeString());

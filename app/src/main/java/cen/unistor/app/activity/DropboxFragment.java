@@ -477,19 +477,27 @@ public class DropboxFragment extends UnistorFragment{
                         this.currentPath.concat(namefile) : this.currentPath.concat("/" + namefile);
             }
 
-            switch (mode) {
-                case Constants.ACTION_COPY:
-                    mDBApi.copy(source, dest);
-                    break;
-                case Constants.ACTION_MOVE:
-                    mDBApi.move(source, dest);
-                    break;
+            if (mDBApi.metadata(dest,1,null,false,null) == null ){
+
+                switch (mode) {
+                    case Constants.ACTION_COPY:
+                        mDBApi.copy(source, dest);
+                        break;
+                    case Constants.ACTION_MOVE:
+                        mDBApi.move(source, dest);
+                        break;
+                }
+
+                // Refresh the current view to reflect the changes
+                this.currentContent = loadContent(this.currentPath);
+                populateContentListView(this.currentContent);
+                result = true;
+            } else{
+                mErrorMsg = mContext.getString(R.string.exists_in_destination);
+                result = false;
             }
 
-            // Refresh the current view to reflect the changes
-            this.currentContent = loadContent(this.currentPath);
-            populateContentListView(this.currentContent);
-            result = true;
+
         }catch (DropboxServerException e) {
             switch (e.error){
                 case DropboxServerException._401_UNAUTHORIZED:

@@ -30,12 +30,15 @@ import com.box.boxjavalibv2.jsonparsing.IBoxJSONParser;
 import com.box.boxjavalibv2.jsonparsing.IBoxResourceHub;
 import com.box.boxjavalibv2.requests.requestobjects.BoxItemCopyRequestObject;
 import com.box.boxjavalibv2.requests.requestobjects.BoxPagingRequestObject;
+import com.box.boxjavalibv2.utils.ISO8601DateParser;
 import com.box.restclientv2.exceptions.BoxRestException;
 
 import org.apache.commons.lang.StringUtils;
 
 import java.io.File;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.Stack;
 import java.util.UUID;
 
@@ -241,8 +244,9 @@ public class BoxFragment extends UnistorFragment{
 
                 }else if(item.getType().equals(Constants.BOX_TYPE_FILE)){
                     entry.setEntryType(Constants.ENTRY_TYPE_FILE);
-                    entry.setSizeString(String.valueOf(item.getSize()));
-                    entry.setLastModification(item.getModifiedAt());
+                    entry.setSizeString(String.valueOf(Math.ceil((item.getSize()/1024.0))) + " Kb");
+                    SimpleDateFormat format = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss Z");
+                    entry.setLastModification(format.format(ISO8601DateParser.parseSilently(item.getModifiedAt())));
 
                 }else if(item.getType().equals(Constants.BOX_TYPE_WEBLINK)){
                     entry.setEntryType(Constants.ENTRY_TYPE_BOOKMARK);
@@ -315,23 +319,38 @@ public class BoxFragment extends UnistorFragment{
     public boolean pasteFile(String source, String name, int mode) {
 
         try {
-            BoxItemCopyRequestObject copyRequestObject = BoxItemCopyRequestObject.copyItemRequestObject(currentPath);
-            copyRequestObject.setName(name);
-            mBoxClient.getFilesManager().copyFile(source, copyRequestObject);
-
-            if( mode == Constants.ACTION_MOVE ){
-                deleteElement(source);
+            boolean exists = false;
+            int i = 0;
+            while (!exists && i < currentContent.size()) {
+                exists = currentContent.get(i).getName().equals(name);
+                i++;
             }
 
-            // Refresh the current view to reflect the changes
+            if (!exists){
+                BoxItemCopyRequestObject copyRequestObject = BoxItemCopyRequestObject.copyItemRequestObject(currentPath);
+                copyRequestObject.setName(name);
+                mBoxClient.getFilesManager().copyFile(source, copyRequestObject);
 
-            this.currentContent = loadContent(this.currentPath);
-            populateContentListView(this.currentContent);
+                if (mode == Constants.ACTION_MOVE) {
+                    deleteElement(source);
+                }
+
+                // Refresh the current view to reflect the changes
+                this.currentContent = loadContent(this.currentPath);
+                populateContentListView(this.currentContent);
+
+            } else {
+                Toast.makeText(mContext, getString(R.string.exists_in_destination), Toast.LENGTH_LONG).show();
+                return false;
+            }
         } catch (BoxRestException e) {
+            Toast.makeText(mContext, getString(R.string.excp_msg), Toast.LENGTH_LONG).show();
             e.printStackTrace();
         } catch (BoxServerException e) {
+            Toast.makeText(mContext, getString(R.string.excp_msg), Toast.LENGTH_LONG).show();
             e.printStackTrace();
         } catch (AuthFatalFailureException e) {
+            Toast.makeText(mContext, getString(R.string.excp_msg), Toast.LENGTH_LONG).show();
             e.printStackTrace();
         }
 
