@@ -72,9 +72,11 @@ public abstract class UnistorFragment extends Fragment implements UploadFileAsyn
         super.onPrepareOptionsMenu(menu);
         MainActivity activity = (MainActivity)getActivity();
         if(activity.getCopyMoveAction() != Constants.ACTION_PASTE_DONE){
-            menu.findItem(R.id.action_paste).setVisible(true);
+            if(menu.findItem(R.id.action_paste) != null)
+                menu.findItem(R.id.action_paste).setVisible(true);
         }else{
-            menu.findItem(R.id.action_paste).setVisible(false);
+            if(menu.findItem(R.id.action_paste) != null)
+                menu.findItem(R.id.action_paste).setVisible(false);
         }
 
         prepareChildOptionsMenu(menu);

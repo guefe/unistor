@@ -305,11 +305,7 @@ public class DropboxFragment extends UnistorFragment{
             // Building back entry into the entry list
             if(!root.parentPath().equals("") && !root.contents.isEmpty()){
                 tmp = new UnistorEntry();
-                if(root.parentPath().equals("/")){
-                    tmp.setName("Volver a Carpeta Raíz");
-                }else{
-                    tmp.setName("Volver a "+root.parentPath().substring(root.parentPath().lastIndexOf('/')+1));
-                }
+                tmp.setName("Volver...");
 
                 tmp.setPath(root.parentPath());
                 tmp.setFolder(true);
@@ -465,19 +461,27 @@ public class DropboxFragment extends UnistorFragment{
 
     @Override
     public boolean pasteFile(String source, String namefile, int mode) {
+        String mErrorMsg = null;
         boolean result = false;
         try {
 
             String dest = this.currentPath.equals("/") ?
                     this.currentPath.concat(namefile) : this.currentPath.concat("/" + namefile);
 
-            if( source.equals(dest) ) {
-                namefile = getString(R.string.copy_prefix) + namefile;
-                dest = this.currentPath.equals("/") ?
-                        this.currentPath.concat(namefile) : this.currentPath.concat("/" + namefile);
+            boolean exists = false;
+            int i = 0;
+            while (!exists && i < currentContent.size()) {
+                exists = currentContent.get(i).getName().equals(namefile);
+                i++;
             }
 
-            if (mDBApi.metadata(dest,1,null,false,null) == null ){
+            if (exists == false ){
+
+                if( source.equals(dest) ) {
+                    namefile = getString(R.string.copy_prefix) + namefile;
+                    dest = this.currentPath.equals("/") ?
+                            this.currentPath.concat(namefile) : this.currentPath.concat("/" + namefile);
+                }
 
                 switch (mode) {
                     case Constants.ACTION_COPY:
@@ -493,8 +497,8 @@ public class DropboxFragment extends UnistorFragment{
                 populateContentListView(this.currentContent);
                 result = true;
             } else{
-                mErrorMsg = mContext.getString(R.string.exists_in_destination);
-                result = false;
+               mErrorMsg = mContext.getString(R.string.exists_in_destination);
+               result = false;
             }
 
 
@@ -536,9 +540,11 @@ public class DropboxFragment extends UnistorFragment{
         } catch (DropboxIOException e) {
             // Happens all the time, probably want to retry automatically.
             mErrorMsg = mContext.getString(R.string.dropbox_IO_excp_msg);
+            e.printStackTrace();
         }catch (DropboxException e) {
             // Unknown error
             mErrorMsg = mContext.getString(R.string.excp_msg);
+            e.printStackTrace();
         }
 
         if(mErrorMsg != null){
